@@ -11,12 +11,14 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 
 @Route(value = "login")
+@RouteAlias(value = "")
 @PageTitle("Betting app")
 @CssImport("./styles/views/login/login-view.css")
 public class LoginView extends Div {
-
+    //Changed
     public LoginView(AuthService authService) {
         setId("login-view");
         //m
