@@ -1,7 +1,7 @@
 package com.example.application.data.repositories;
 
-import com.example.application.data.entity.User;
+import com.example.application.data.entity.BettingTickets;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BettingTicketsRepository extends JpaRepository<User, Integer> {
+public interface BettingTicketsRepository extends JpaRepository<BettingTickets, Integer> {
 }
