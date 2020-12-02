@@ -1,6 +1,7 @@
 package com.example.application.data.entity;
 
 import com.example.application.data.AbstractEntity;
+import com.example.application.data.BetType;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -9,10 +10,12 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "BettingTicket")
-public class BettingTicket extends AbstractEntity {
+@Table(name = "Bet")
+public class Bet extends AbstractEntity {
+    private int userID;
     private String homeTeam;
     private String awayTeam;
+    private BetType betType;
     private double odd;
     private LocalDate date;
 }

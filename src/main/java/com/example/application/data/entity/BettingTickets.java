@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "BettingTickets")
 public class BettingTickets extends AbstractEntity {
-    private List<BettingTicket> bettingTickets;
+    private String betIDs;
     private boolean ongoing;
     private boolean won;
 }
