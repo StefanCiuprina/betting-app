@@ -12,6 +12,6 @@ import java.util.List;
 @Table(name = "BettingTickets")
 public class BettingTickets extends AbstractEntity {
     private List<BettingTicket> bettingTickets;
-    private boolean onGoing;
+    private boolean ongoing;
     private boolean won;
 }
