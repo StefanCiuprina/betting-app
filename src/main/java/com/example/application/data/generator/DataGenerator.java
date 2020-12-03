@@ -2,9 +2,11 @@ package com.example.application.data.generator;
 
 import com.example.application.data.BetType;
 import com.example.application.data.entity.Bet;
+import com.example.application.data.entity.BettingTicket;
 import com.example.application.data.entity.Role;
 import com.example.application.data.entity.User;
 import com.example.application.data.repositories.BetRepository;
+import com.example.application.data.repositories.BettingTicketRepository;
 import com.example.application.data.repositories.UserRepository;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
@@ -20,12 +22,20 @@ import java.time.Month;
 @SpringComponent
 public class DataGenerator {
 
+    //BettingTicketRepository bettingTicketRepository;
+
     @Bean
-    public CommandLineRunner loadData(UserRepository userRepository) {
+    public CommandLineRunner loadData(BettingTicketRepository bettingTicketRepository, UserRepository userRepository) {
         return args -> {
             Logger logger = LoggerFactory.getLogger(getClass());
 
             //betRepository.save(new Bet(1, "FC Voluntari", "CFR Cluj", BetType.ONE, 2, LocalDate.of(2000, Month.JUNE, 30), true));
+            //bettingTicketRepository.save(new BettingTicket(2, "2_3", 3.47, 275,
+            //        true, false, LocalDate.now()));
+            //bettingTicketRepository.save(new BettingTicket(2, "2_3", 4.2, 105,
+            //        false, false, LocalDate.now()));
+            //bettingTicketRepository.save(new BettingTicket(2, "2_3", 85.2, 3845.75,
+            //        false, true, LocalDate.now()));
             logger.info("Generated demo data");
 
             if (userRepository.count() != 0L) {

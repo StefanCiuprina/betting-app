@@ -5,6 +5,8 @@ import com.example.application.data.repositories.BettingTicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BettingTicketService {
 
@@ -17,6 +19,10 @@ public class BettingTicketService {
 
     public void deleteBettingTicketById(int id) {
         bettingTicketRepository.deleteById(id);
+    }
+
+    public List<BettingTicket> getAllBettingTicketsOfUser(int userID) {
+        return bettingTicketRepository.getAllByUserID(userID);
     }
 
 }

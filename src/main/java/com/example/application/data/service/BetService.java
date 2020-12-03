@@ -24,8 +24,16 @@ public class BetService {
         betRepository.deleteById(id);
     }
 
-    public List<Bet> getAllCurrentBetsOfUser(int id) {
-        return betRepository.getAllByUserIDAndNotPlacedYet(id, true);
+    public void setAllBetsPlaced(int id) {
+        List<Bet> bets = betRepository.getAllByUserIDAndPlaced(id, false);
+        for(Bet bet : bets) {
+            bet.setPlaced(true);
+        }
+        betRepository.saveAll(bets);
+    }
+
+    public List<Bet> getAllCurrentBetsOfUser(int userID) {
+        return betRepository.getAllByUserIDAndPlaced(userID, false);
     }
 
 }

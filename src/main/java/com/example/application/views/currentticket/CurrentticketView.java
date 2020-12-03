@@ -2,8 +2,10 @@ package com.example.application.views.currentticket;
 
 import com.example.application.data.BetType;
 import com.example.application.data.entity.Bet;
+import com.example.application.data.entity.BettingTicket;
 import com.example.application.data.service.AuthService;
 import com.example.application.data.service.BetService;
+import com.example.application.data.service.BettingTicketService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -12,6 +14,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -31,10 +34,16 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
     Grid<BetDisplay> grid = new Grid<>();
 
     private BetService betService;
+    private BettingTicketService bettingTicketService;
 
-    public CurrentticketView(@Autowired BetService betService) {
+    private String betIDs;
+    private double finalOdd;
+    private double possibleAmountToWin;
+
+    public CurrentticketView(@Autowired BetService betService, @Autowired BettingTicketService bettingTicketService) {
         setId("currentticket-view");
         this.betService = betService;
+        this.bettingTicketService = bettingTicketService;
         addClassName("currentticket-view");
         setSizeFull();
         grid.setHeight("100%");
@@ -97,14 +106,28 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
                 @Override
                 public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> textFieldStringComponentValueChangeEvent) {
                     try {
-                        double possibleSumToWin = Double.parseDouble(betDisplay.getFinalOdd()) * Double.parseDouble(textFieldAmountToBet.getValue());
-                        textPossibleSumToWin.setText(String.valueOf(possibleSumToWin));
+                        possibleAmountToWin = Double.parseDouble(betDisplay.getFinalOdd()) * Double.parseDouble(textFieldAmountToBet.getValue());
+                        textPossibleSumToWin.setText(String.valueOf(possibleAmountToWin));
                     } catch (NumberFormatException e) {
                         textPossibleSumToWin.setText("0");
                     }
                 }
             });
             Button buttonPlaceBet = new Button("Place bet");
+
+            buttonPlaceBet.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+                @Override
+                public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                    BettingTicket bettingTicket = new BettingTicket(AuthService.currentUserID,
+                            betIDs, finalOdd,
+                            possibleAmountToWin, false, false,
+                            LocalDate.now());
+                    bettingTicketService.addBettingTicket(bettingTicket);
+                    Notification.show("Bet placed!");
+                    betService.setAllBetsPlaced(AuthService.currentUserID);
+                    UI.getCurrent().getPage().reload();
+                }
+            });
 
             amountAndPlace.add(textTitleAmountToBet, textFieldAmountToBet, textTitlePossibleSumToWin, textPossibleSumToWin);
             description.add(textTitleFinalOdd, textFinalOdd, amountAndPlace, buttonPlaceBet);
@@ -119,7 +142,7 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
         List<Bet> bets = betService.getAllCurrentBetsOfUser(AuthService.currentUserID);
 
         List<BetDisplay> betDisplays = new ArrayList<>();
-        double finalOdd = 1;
+        finalOdd = 1;
         StringBuilder betIDs = new StringBuilder();
         for(Bet bet : bets) {
             String imageHome, imageAway;
@@ -131,8 +154,11 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
             betIDs.append(bet.getId());
             betIDs.append("_");
         }
-        betIDs.deleteCharAt(betIDs.length()-1); //delete last _
-        betDisplays.add(finishBet(finalOdd, betIDs.toString()));
+        if(!betIDs.toString().equals("")) {
+            betIDs.deleteCharAt(betIDs.length() - 1); //delete last _
+            betDisplays.add(finishBet(finalOdd, betIDs.toString()));
+            this.betIDs = betIDs.toString();
+        }
 
         grid.setItems(betDisplays);
     }
