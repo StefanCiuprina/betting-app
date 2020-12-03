@@ -1,6 +1,7 @@
 package com.example.application;
 
 import com.example.application.data.entity.PastMatch;
+import com.example.application.data.service.OddsService;
 import com.example.application.data.service.PastMatchService;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
@@ -24,19 +25,9 @@ public class Application extends SpringBootServletInitializer implements AppShel
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(Application.class, args);
 
-        PastMatchService matchService = (PastMatchService) context.getBean("pastMatchService");
-        List<PastMatch> list1 = matchService.getHead2HeadMatches("CFR Cluj", "U Craiova");
-        List<PastMatch> list2 = matchService.getMatchesWhereTheTeamWasAwayTeam("CFR Cluj");
-        List<String> list = matchService.getListOfTeamsName();
 
-        if(list == null) {
-            System.out.println("the list is null");
-        }else {
-            System.out.println(list.size());
-            for (String match : list) {
-                System.out.println(match);
-            }
-        }
+        OddsService oddsService = (OddsService) context.getBean("oddsService");
+        System.out.println(oddsService.getBetOdds("FC Voluntari", "Academica Clinceni"));
 
     }
 

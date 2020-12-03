@@ -1,11 +1,15 @@
 package com.example.application.views.upcomingMatchesAdder;
 
+import com.example.application.data.entity.UpcomingMatch;
 import com.example.application.data.service.UpcomingMatchService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -14,11 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Locale;
 
 @Route(value = "addmatches")
 @PageTitle("Add upcoming matches")
-public class UpcomingMatchesAdderView extends Div {
+public class UpcomingMatchesAdderView extends VerticalLayout {
 
     private UpcomingMatchService upcomingMatchService;
     private DatePicker matchDatePicker = new DatePicker();
@@ -26,17 +31,67 @@ public class UpcomingMatchesAdderView extends Div {
     private ComboBox<String> homeTeamComboBox = new ComboBox<>();
     private ComboBox<String> awayTeamComboBox = new ComboBox<>();
     private Button addMatchButton = new Button("Add match");
+    private Button deleteMatchButton = new Button("Delete match");
+    private Grid<UpcomingMatch> grid = new Grid<>();
 
     public UpcomingMatchesAdderView(@Autowired UpcomingMatchService upcomingMatchService) {
         this.upcomingMatchService = upcomingMatchService;
+        setSizeFull();
         setId("upcoming-matches-view");
         configureDateTimePicker();
         configureComboBox();
+        configureAddButton();
+        configureDeleteButton();
+        configureGrid();
+        HorizontalLayout h1 = new HorizontalLayout(matchDatePicker, matchTimePicker, homeTeamComboBox, awayTeamComboBox, addMatchButton, deleteMatchButton);
+        h1.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.BASELINE);
+        Div content = new Div(grid);
+        content.setSizeFull();
+        updateGrid();
+        add(h1, content);
+    }
 
+    private void configureDeleteButton() {
+        deleteMatchButton.addClickListener(buttonClickEvent -> {
+            UpcomingMatch upcomingMatch = grid.asSingleSelect().getValue();
+            if(upcomingMatch != null) {
+                upcomingMatchService.removeMatch(upcomingMatch);
+                updateGrid();
+            }
+        });
+    }
 
-        HorizontalLayout h1 = new HorizontalLayout(matchDatePicker, matchTimePicker, homeTeamComboBox, awayTeamComboBox);
-        add(h1);
+    private void updateGrid() {
+        List<UpcomingMatch> d = upcomingMatchService.findAll();
+        grid.setItems(upcomingMatchService.findAll());
+    }
 
+    private void configureGrid() {
+        grid.addClassName("upcoming-matches-grid");
+        grid.setSizeFull();
+        grid.addColumn(UpcomingMatch::getMatch_date).setHeader("Match date");
+        grid.addColumn(UpcomingMatch::getMatch_time).setHeader("Match time");
+        grid.addColumn(UpcomingMatch::getHome_team).setHeader("Home team");
+        grid.addColumn(UpcomingMatch::getAway_team).setHeader("Away team");
+
+    }
+
+    private void configureAddButton() {
+        addMatchButton.addClickListener(buttonClickEvent ->  {
+            if(checkForValidInput()) {
+                UpcomingMatch upcomingMatch = new UpcomingMatch(matchDatePicker.getValue(), matchTimePicker.getValue(), homeTeamComboBox.getValue(), awayTeamComboBox.getValue());
+                upcomingMatchService.addUpcomingMatch(upcomingMatch);
+                updateGrid();
+            }
+        });
+
+    }
+
+    private boolean checkForValidInput() {
+
+        return homeTeamComboBox.getValue() != null && awayTeamComboBox.getValue() != null &&
+                !homeTeamComboBox.getValue().equals("") && !awayTeamComboBox.getValue().equals("") &&
+                !homeTeamComboBox.getValue().equals(awayTeamComboBox.getValue());
     }
 
     private void configureComboBox() {
@@ -44,6 +99,8 @@ public class UpcomingMatchesAdderView extends Div {
         awayTeamComboBox.setItems(upcomingMatchService.getFirstLeagueCurrentTeams());
         homeTeamComboBox.setLabel("Home team");
         awayTeamComboBox.setLabel("Away team");
+        homeTeamComboBox.setAllowCustomValue(false);
+        awayTeamComboBox.setAllowCustomValue(false);
     }
 
     private void configureDateTimePicker() {
@@ -58,5 +115,6 @@ public class UpcomingMatchesAdderView extends Div {
         matchTimePicker.setLocale(Locale.ITALY);
         matchDatePicker.setLocale(Locale.ITALY);
     }
+
 
 }
