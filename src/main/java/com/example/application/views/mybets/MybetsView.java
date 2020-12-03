@@ -70,20 +70,30 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         Label space2 = new Label("_____");
         space2.getStyle().set("color", "white");
 
+        HorizontalLayout left = new HorizontalLayout();
         String titlePossibleAmountToWinString = bettingTicketDisplay.getOngoing().equals("ongoing") ?
                 "Possible amount to win: " : "Won: ";
         Text titlePossibleAmountToWin = new Text(titlePossibleAmountToWinString);
         Span possibleAmountToWin = new Span(bettingTicketDisplay.getPossibleAmountToWin());
         possibleAmountToWin.addClassName("possibleAmountToWin");
+        left.add(titlePossibleAmountToWin, possibleAmountToWin);
+        left.setAlignItems(FlexComponent.Alignment.START);
+
+        HorizontalLayout middle = new HorizontalLayout();
         Text titleOdd = new Text("Odd: ");
         Span odd = new Span(bettingTicketDisplay.getOdd());
         odd.addClassName("odd");
+        middle.add(titleOdd, odd);
+        middle.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        HorizontalLayout right = new HorizontalLayout();
         Text titleDatePlaced = new Text("Date Placed: ");
         Span datePlaced = new Span(bettingTicketDisplay.getDatePlaced());
         datePlaced.addClassName("datePlaced");
-        header.add(titlePossibleAmountToWin, possibleAmountToWin, space,
-                titleOdd, odd, space2,
-                titleDatePlaced, datePlaced);
+        right.add(titleDatePlaced, datePlaced);
+        right.setAlignItems(FlexComponent.Alignment.END);
+
+        header.add(left, middle, right);
 
 
         HorizontalLayout status = new HorizontalLayout();
