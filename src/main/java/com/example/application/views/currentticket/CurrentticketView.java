@@ -131,8 +131,11 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
             betIDs.append(bet.getId());
             betIDs.append("_");
         }
-        betIDs.deleteCharAt(betIDs.length()-1); //delete last _
-        betDisplays.add(finishBet(finalOdd, betIDs.toString()));
+        if(!betIDs.toString().equals("")) {
+            betIDs.deleteCharAt(betIDs.length()-1); //delete last _
+            betDisplays.add(finishBet(finalOdd, betIDs.toString()));
+        }
+
 
         grid.setItems(betDisplays);
     }
