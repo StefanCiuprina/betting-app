@@ -1,7 +1,10 @@
 package com.example.application.data.generator;
 
+import com.example.application.data.BetType;
+import com.example.application.data.entity.Bet;
 import com.example.application.data.entity.Role;
 import com.example.application.data.entity.User;
+import com.example.application.data.repositories.BetRepository;
 import com.example.application.data.repositories.UserRepository;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
@@ -21,6 +24,10 @@ public class DataGenerator {
     public CommandLineRunner loadData(UserRepository userRepository) {
         return args -> {
             Logger logger = LoggerFactory.getLogger(getClass());
+
+            //betRepository.save(new Bet(1, "FC Voluntari", "CFR Cluj", BetType.ONE, 2, LocalDate.of(2000, Month.JUNE, 30), true));
+            logger.info("Generated demo data");
+
             if (userRepository.count() != 0L) {
                 logger.info("Using existing database");
                 return;
@@ -36,7 +43,7 @@ public class DataGenerator {
             userRepository.save(new User("stefan", "s", Role.ADMIN, "stefan.ciuprina@gmail.com", "Stefan Ciuprina", date));
             userRepository.save(new User("andrei", "a", Role.USER, "andreiavram99@gmail.com", "Andrei Avram", date2));
 
-            logger.info("Generated demo data");
+
         };
     }
 
