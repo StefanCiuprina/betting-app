@@ -2,6 +2,7 @@ package com.example.application.data.service;
 
 import com.example.application.data.entity.Role;
 import com.example.application.data.entity.User;
+import com.example.application.data.repositories.UserRepository;
 import com.example.application.views.admin.AdminView;
 import com.example.application.views.currentticket.CurrentticketView;
 import com.example.application.views.home.BetNowView;
@@ -9,6 +10,7 @@ import com.example.application.views.logout.LogoutView;
 import com.example.application.views.main.MainView;
 import com.example.application.views.mybets.MybetsView;
 import com.example.application.views.settings.SettingsView;
+import com.example.application.views.upcomingMatchesAdder.UpcomingMatchesAdderView;
 import com.example.application.views.wallet.WalletView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -86,6 +88,7 @@ public class AuthService extends CrudService<User, Integer> {
             routes.add(new AuthorizedRoute("home", "Bet Now", BetNowView.class));
             routes.add(new AuthorizedRoute("admin", "Admin", AdminView.class));
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class));
+            routes.add(new AuthorizedRoute("addmatches", "Add upcoming matches", UpcomingMatchesAdderView.class));
         }
 
         return routes;
