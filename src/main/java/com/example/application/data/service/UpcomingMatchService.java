@@ -1,5 +1,6 @@
 package com.example.application.data.service;
 
+import com.example.application.data.entity.UpcomingMatch;
 import com.example.application.data.repositories.UpcomingMatchesRepository;
 import org.springframework.stereotype.Service;
 
@@ -37,5 +38,20 @@ public class UpcomingMatchService {
         teams.add("FC Botosani");
         Collections.sort(teams);
         return teams;
+    }
+
+    public List<UpcomingMatch> findAll() {
+        return upcomingMatchesRepository.findAll();
+    }
+
+    public void addUpcomingMatch(UpcomingMatch match) {
+        List<UpcomingMatch> checkForDuplicates = upcomingMatchesRepository.getUpcomingMatchByAllProperties(match.getMatch_date(), match.getMatch_time(), match.getHome_team(), match.getAway_team());
+        if(checkForDuplicates == null || checkForDuplicates.size() == 0) {
+            upcomingMatchesRepository.save(match);
+        }
+    }
+
+    public void removeMatch(UpcomingMatch upcomingMatch) {
+        upcomingMatchesRepository.delete(upcomingMatch);
     }
 }
