@@ -22,12 +22,20 @@ import java.util.List;
 @PWA(name = "auth-example", shortName = "auth-example")
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(Application.class, args);
 
-
-        OddsService oddsService = (OddsService) context.getBean("oddsService");
-        System.out.println(oddsService.getBetOdds("FC Voluntari", "Academica Clinceni"));
+//        OddsService oddsService = (OddsService) context.getBean("oddsService");
+//        System.out.println(oddsService.getBetOdds("FC Voluntari", "Academica Clinceni"));
 
     }
 

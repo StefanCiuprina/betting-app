@@ -22,20 +22,20 @@ import java.time.Month;
 @SpringComponent
 public class DataGenerator {
 
-    //BettingTicketRepository bettingTicketRepository;
 
     @Bean
-    public CommandLineRunner loadData(BettingTicketRepository bettingTicketRepository, UserRepository userRepository) {
+    public CommandLineRunner loadData(BetRepository betRepository, BettingTicketRepository bettingTicketRepository, UserRepository userRepository) {
         return args -> {
             Logger logger = LoggerFactory.getLogger(getClass());
 
-            //betRepository.save(new Bet(1, "FC Voluntari", "CFR Cluj", BetType.ONE, 2, LocalDate.of(2000, Month.JUNE, 30), true));
-            //bettingTicketRepository.save(new BettingTicket(2, "2_3", 3.47, 275,
-            //        true, false, LocalDate.now()));
-            //bettingTicketRepository.save(new BettingTicket(2, "2_3", 4.2, 105,
-            //        false, false, LocalDate.now()));
-            //bettingTicketRepository.save(new BettingTicket(2, "2_3", 85.2, 3845.75,
-            //        false, true, LocalDate.now()));
+//            betRepository.save(new Bet(62, "FC Voluntari", "CFR Cluj", BetType.ONE, 1.12, LocalDate.of(2000, Month.JUNE, 30), false));
+//            betRepository.save(new Bet(62, "Astra", "CFR Cluj", BetType.ONE, 1.63, LocalDate.of(2000, Month.JUNE, 30), false));
+//            bettingTicketRepository.save(new BettingTicket(62, "2_3", 3.47, 275,
+//                    true, false, LocalDate.now()));
+//            bettingTicketRepository.save(new BettingTicket(62, "2_3", 4.2, 105,
+//                    false, false, LocalDate.now()));
+//            bettingTicketRepository.save(new BettingTicket(62, "2_3", 85.2, 3845.75,
+//                    false, true, LocalDate.now()));
             logger.info("Generated demo data");
 
             if (userRepository.count() != 0L) {
