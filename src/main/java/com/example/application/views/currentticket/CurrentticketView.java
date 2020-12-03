@@ -52,6 +52,15 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
         add(grid);
     }
 
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
+
     private HorizontalLayout createCard(BetDisplay betDisplay) {
         HorizontalLayout card = new HorizontalLayout();
         card.addClassName("card");
@@ -107,6 +116,7 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
                 public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> textFieldStringComponentValueChangeEvent) {
                     try {
                         possibleAmountToWin = Double.parseDouble(betDisplay.getFinalOdd()) * Double.parseDouble(textFieldAmountToBet.getValue());
+                        possibleAmountToWin = round(possibleAmountToWin, 2);
                         textPossibleSumToWin.setText(String.valueOf(possibleAmountToWin));
                     } catch (NumberFormatException e) {
                         textPossibleSumToWin.setText("0");
@@ -154,18 +164,12 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
             betIDs.append(bet.getId());
             betIDs.append("_");
         }
+        finalOdd = round(finalOdd, 2);
         if(!betIDs.toString().equals("")) {
-<<<<<<< HEAD
-            betIDs.deleteCharAt(betIDs.length()-1); //delete last _
-            betDisplays.add(finishBet(finalOdd, betIDs.toString()));
-        }
-
-=======
             betIDs.deleteCharAt(betIDs.length() - 1); //delete last _
             betDisplays.add(finishBet(finalOdd, betIDs.toString()));
             this.betIDs = betIDs.toString();
         }
->>>>>>> 382550ad6ef6d56f29cf14767e88ccfe3baa77d8
 
         grid.setItems(betDisplays);
     }

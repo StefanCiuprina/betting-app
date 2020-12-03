@@ -59,11 +59,6 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         description.setSpacing(false);
         description.setPadding(false);
 
-        HorizontalLayout header = new HorizontalLayout();
-        header.addClassName("header");
-        header.setSpacing(false);
-        header.getThemeList().add("spacing-s");
-
         Label space = new Label("_____");
         space.getStyle().set("color", "white");
 
@@ -77,24 +72,21 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         Span possibleAmountToWin = new Span(bettingTicketDisplay.getPossibleAmountToWin());
         possibleAmountToWin.addClassName("possibleAmountToWin");
         left.add(titlePossibleAmountToWin, possibleAmountToWin);
-        left.setAlignItems(FlexComponent.Alignment.START);
 
         HorizontalLayout middle = new HorizontalLayout();
         Text titleOdd = new Text("Odd: ");
         Span odd = new Span(bettingTicketDisplay.getOdd());
         odd.addClassName("odd");
         middle.add(titleOdd, odd);
-        middle.setAlignItems(FlexComponent.Alignment.CENTER);
+        middle.getStyle().set("width", "100%");
 
         HorizontalLayout right = new HorizontalLayout();
+        right.setSpacing(false);
+        right.setPadding(false);
         Text titleDatePlaced = new Text("Date Placed: ");
         Span datePlaced = new Span(bettingTicketDisplay.getDatePlaced());
         datePlaced.addClassName("datePlaced");
         right.add(titleDatePlaced, datePlaced);
-        right.setAlignItems(FlexComponent.Alignment.END);
-
-        header.add(left, middle, right);
-
 
         HorizontalLayout status = new HorizontalLayout();
         status.addClassName("status");
@@ -114,8 +106,8 @@ public class MybetsView extends Div implements AfterNavigationObserver {
             status.add(ongoing, ongoingIcon, wonOrLost, wonOrLostIcon);
         }
 
-        description.add(header, status);
-        card.add(description);
+        description.add(left, status);
+        card.add(description, middle, right);
         return card;
     }
 
