@@ -48,22 +48,23 @@ public class AuthService extends CrudService<User, Integer> {
     @Autowired
     private final UserRepository userRepository;
 
+    public static int currentUserID;
+
     public AuthService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     public void authenticate(String username, String password) throws AuthException {
         User user = userRepository.getByUsername(username);
-        if(user == null) {
-            System.out.println("user nul");
-        }
         if (user != null && user.checkPassword(password)) {
+            currentUserID = user.getId();
             VaadinSession.getCurrent().setAttribute(User.class, user);
             createRoutes(user.getRole());
         } else {
             throw new AuthException();
         }
     }
+
 
     private void createRoutes(Role role) {
         getAuthorizedRoutes(role).stream()

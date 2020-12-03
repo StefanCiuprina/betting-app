@@ -6,21 +6,21 @@ export const addCssBlock = function(block, before = false) {
 
 addCssBlock('<custom-style><style include="lumo-color lumo-typography"></style></custom-style>', true);
 
-import $css_0 from 'Frontend/styles/views/main/main-view.css';
+import $css_0 from 'Frontend/styles/views/admin/admin-view.css';
 addCssBlock(`<custom-style><style>${$css_0}</style></custom-style>`);
 import $css_1 from 'Frontend/styles/views/mybets/mybets-view.css';
 addCssBlock(`<custom-style><style include="lumo-badge">${$css_1}</style></custom-style>`);
-import $css_2 from 'Frontend/styles/views/admin/admin-view.css';
+import $css_2 from 'Frontend/styles/views/main/main-view.css';
 addCssBlock(`<custom-style><style>${$css_2}</style></custom-style>`);
-import $css_3 from 'Frontend/styles/views/currentticket/currentticket-view.css';
+import $css_3 from 'Frontend/styles/views/settings/settings-view.css';
 addCssBlock(`<custom-style><style include="lumo-badge">${$css_3}</style></custom-style>`);
-import $css_4 from 'Frontend/styles/views/settings/settings-view.css';
-addCssBlock(`<custom-style><style include="lumo-badge">${$css_4}</style></custom-style>`);
-import $css_5 from 'Frontend/styles/views/login/login-view.css';
+import $css_4 from 'Frontend/styles/views/login/login-view.css';
+addCssBlock(`<custom-style><style>${$css_4}</style></custom-style>`);
+import $css_5 from 'Frontend/styles/views/wallet/wallet-view.css';
 addCssBlock(`<custom-style><style>${$css_5}</style></custom-style>`);
-import $css_6 from 'Frontend/styles/views/wallet/wallet-view.css';
-addCssBlock(`<custom-style><style>${$css_6}</style></custom-style>`);
-import $css_7 from 'Frontend/styles/views/home/home-view.css';
+import $css_6 from 'Frontend/styles/views/home/home-view.css';
+addCssBlock(`<custom-style><style include="lumo-badge">${$css_6}</style></custom-style>`);
+import $css_7 from 'Frontend/styles/views/currentticket/currentticket-view.css';
 addCssBlock(`<custom-style><style include="lumo-badge">${$css_7}</style></custom-style>`);
 
 import '@polymer/iron-icon/iron-icon.js';
