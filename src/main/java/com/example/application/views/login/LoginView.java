@@ -18,6 +18,7 @@ import com.vaadin.flow.router.RouteAlias;
 @PageTitle("Betting app")
 @CssImport("./styles/views/login/login-view.css")
 public class LoginView extends Div {
+
     public LoginView(AuthService authService) {
         setId("login-view");
         TextField username = new TextField("Username");
