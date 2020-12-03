@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface BetRepository extends JpaRepository<Bet, Integer> {
 
-    List<Bet> getAllByUserIDAndNotPlacedYet(int id, boolean notPlacedYet);
+    List<Bet> getAllByUserIDAndPlaced(int id, boolean placed);
 
 }

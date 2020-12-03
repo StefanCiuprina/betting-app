@@ -22,5 +22,5 @@ public class Bet extends AbstractEntity {
     private BetType betType;
     private double odd;
     private LocalDate date;
-    private boolean notPlacedYet;
+    private boolean placed;
 }

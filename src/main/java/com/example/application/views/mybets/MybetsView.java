@@ -1,21 +1,31 @@
 package com.example.application.views.mybets;
 
+import com.example.application.data.entity.Bet;
+import com.example.application.data.entity.BettingTicket;
+import com.example.application.data.service.AuthService;
+import com.example.application.data.service.BettingTicketService;
+import com.example.application.views.currentticket.BetDisplay;
 import com.example.application.views.main.MainView;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,26 +33,27 @@ import java.util.List;
 @CssImport(value = "./styles/views/mybets/mybets-view.css", include = "lumo-badge")
 public class MybetsView extends Div implements AfterNavigationObserver {
 
-    Grid<Person> grid = new Grid<>();
+    Grid<BettingTicketDisplay> grid = new Grid<>();
 
-    public MybetsView() {
+    private BettingTicketService bettingTicketService;
+
+    public MybetsView(@Autowired BettingTicketService bettingTicketService) {
         setId("mybets-view");
+        this.bettingTicketService = bettingTicketService;
         addClassName("mybets-view");
         setSizeFull();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(person -> createCard(person));
+        grid.addComponentColumn(this::createCard);
         add(grid);
     }
 
-    private HorizontalLayout createCard(Person person) {
+    private HorizontalLayout createCard(BettingTicketDisplay bettingTicketDisplay) {
         HorizontalLayout card = new HorizontalLayout();
         card.addClassName("card");
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        Image image = new Image();
-        image.setSrc(person.getImage());
         VerticalLayout description = new VerticalLayout();
         description.addClassName("description");
         description.setSpacing(false);
@@ -53,105 +64,93 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         header.setSpacing(false);
         header.getThemeList().add("spacing-s");
 
-        Span name = new Span(person.getName());
-        name.addClassName("name");
-        Span date = new Span(person.getDate());
-        date.addClassName("date");
-        header.add(name, date);
+        Label space = new Label("_____");
+        space.getStyle().set("color", "white");
 
-        Span post = new Span(person.getPost());
-        post.addClassName("post");
+        Label space2 = new Label("_____");
+        space2.getStyle().set("color", "white");
 
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.addClassName("actions");
-        actions.setSpacing(false);
-        actions.getThemeList().add("spacing-s");
+        HorizontalLayout left = new HorizontalLayout();
+        String titlePossibleAmountToWinString = bettingTicketDisplay.getOngoing().equals("ongoing") ?
+                "Possible amount to win: " : "Won: ";
+        Text titlePossibleAmountToWin = new Text(titlePossibleAmountToWinString);
+        Span possibleAmountToWin = new Span(bettingTicketDisplay.getPossibleAmountToWin());
+        possibleAmountToWin.addClassName("possibleAmountToWin");
+        left.add(titlePossibleAmountToWin, possibleAmountToWin);
+        left.setAlignItems(FlexComponent.Alignment.START);
 
-        IronIcon likeIcon = new IronIcon("vaadin", "heart");
-        Span likes = new Span(person.getLikes());
-        likes.addClassName("likes");
-        IronIcon commentIcon = new IronIcon("vaadin", "comment");
-        Span comments = new Span(person.getComments());
-        comments.addClassName("comments");
-        IronIcon shareIcon = new IronIcon("vaadin", "connect");
-        Span shares = new Span(person.getShares());
-        shares.addClassName("shares");
+        HorizontalLayout middle = new HorizontalLayout();
+        Text titleOdd = new Text("Odd: ");
+        Span odd = new Span(bettingTicketDisplay.getOdd());
+        odd.addClassName("odd");
+        middle.add(titleOdd, odd);
+        middle.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+        HorizontalLayout right = new HorizontalLayout();
+        Text titleDatePlaced = new Text("Date Placed: ");
+        Span datePlaced = new Span(bettingTicketDisplay.getDatePlaced());
+        datePlaced.addClassName("datePlaced");
+        right.add(titleDatePlaced, datePlaced);
+        right.setAlignItems(FlexComponent.Alignment.END);
 
-        description.add(header, post, actions);
-        card.add(image, description);
+        header.add(left, middle, right);
+
+
+        HorizontalLayout status = new HorizontalLayout();
+        status.addClassName("status");
+        status.setSpacing(false);
+        status.getThemeList().add("spacing-s");
+
+        Span ongoing = new Span(bettingTicketDisplay.getOngoing());
+        ongoing.addClassName("ongoing");
+        IronIcon ongoingIcon = new IronIcon("vaadin", bettingTicketDisplay.getOngoingIcon());
+        Span wonOrLost = new Span(bettingTicketDisplay.getWonOrLost());
+        wonOrLost.addClassName("wonOrLost");
+        IronIcon wonOrLostIcon = new IronIcon("vaadin", bettingTicketDisplay.getWonOrLostIcon());
+
+        if(bettingTicketDisplay.getOngoing().equals("ongoing")) {
+            status.add(ongoing, ongoingIcon);
+        } else {
+            status.add(ongoing, ongoingIcon, wonOrLost, wonOrLostIcon);
+        }
+
+        description.add(header, status);
+        card.add(description);
         return card;
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
 
-        // Set some data when this view is displayed.
-        List<Person> persons = Arrays.asList( //
-                createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
+        List<BettingTicket> bettingTickets = bettingTicketService.getAllBettingTicketsOfUser(AuthService.currentUserID);
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
+        List<BettingTicketDisplay> bettingTicketDisplays = new ArrayList<>();
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
+        for(BettingTicket bettingTicket : bettingTickets) {
+            String ongoing = bettingTicket.isOngoing() ? "ongoing" : "finished";
+            String ongoingIcon = bettingTicket.isOngoing() ? "forward" : "check";
+            String wonOrLost = bettingTicket.isWon() ? "won" : "lost";
+            String wonOrLostIcon = bettingTicket.isWon() ? "check" : "close";
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
+            String possibleAmountToWin;
+            if(bettingTicket.isOngoing()) {
+                possibleAmountToWin = String.valueOf(bettingTicket.getPossibleAmountToWin());
+            } else {
+                if(bettingTicket.isWon()) {
+                    possibleAmountToWin = String.valueOf(bettingTicket.getPossibleAmountToWin());
+                } else {
+                    possibleAmountToWin = "0";
+                }
+            }
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
+            bettingTicketDisplays.add(new BettingTicketDisplay(String.valueOf(bettingTicket.getOdd()),
+                    possibleAmountToWin,
+                    bettingTicket.getDatePlaced().toString(),
+                    ongoing, ongoingIcon,
+                    wonOrLost, wonOrLostIcon));
+        }
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
-
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
-
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
-
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
-
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20")
-
-        );
-
-        grid.setItems(persons);
-    }
-
-    private static Person createPerson(String image, String name, String date, String post, String likes,
-            String comments, String shares) {
-        Person p = new Person();
-        p.setImage(image);
-        p.setName(name);
-        p.setDate(date);
-        p.setPost(post);
-        p.setLikes(likes);
-        p.setComments(comments);
-        p.setShares(shares);
-
-        return p;
+        grid.setItems(bettingTicketDisplays);
     }
 
 }
