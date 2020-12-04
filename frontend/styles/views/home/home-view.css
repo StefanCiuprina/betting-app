@@ -21,6 +21,10 @@
   width: var(--lumo-size-m);
 }
 
+.v-grid-cell-focused:before {
+  display: none !important;
+}
+
 .home-view .header {
   align-items: baseline;
 }
