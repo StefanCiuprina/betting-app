@@ -1,5 +1,8 @@
 package com.example.application.views.home;
 
+import com.example.application.data.BetType;
+import com.example.application.data.entity.Bet;
+import com.example.application.data.service.AuthService;
 import com.example.application.data.service.BetService;
 import com.example.application.data.service.MatchWithOddsService;
 import com.vaadin.flow.component.Component;
@@ -12,6 +15,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -37,6 +42,7 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         setSizeFull();
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         grid.addComponentColumn(this::populateGrid);
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
         add(grid);
 
     }
@@ -49,16 +55,27 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         Button drawButton = new Button("X _____" + matchWithOdds.getBetOdds().getDraw());
         Button awayWinButton = new Button("2 _____ " + matchWithOdds.getBetOdds().getAwayWin());
 
+        homeWinButton.setDisableOnClick(true);
+        awayWinButton.setDisableOnClick(true);
+        drawButton.setDisableOnClick(true);
+
         homeWinButton.addClickListener(buttonClickEvent -> {
-            System.out.println(homeWinButton.getText());
+            awayWinButton.setEnabled(true);
+            drawButton.setEnabled(true);
+            placeBet("home", matchWithOdds);
         });
 
+
         drawButton.addClickListener(buttonClickEvent -> {
-            System.out.println(drawButton.getText());
+            awayWinButton.setEnabled(true);
+            homeWinButton.setEnabled(true);
+            placeBet("draw", matchWithOdds);
         });
 
         awayWinButton.addClickListener(buttonClickEvent -> {
-            System.out.println(awayWinButton.getText());
+            homeWinButton.setEnabled(true);
+            drawButton.setEnabled(true);
+            placeBet("away", matchWithOdds);
         });
 
         VerticalLayout homeTeamLayout = new VerticalLayout();
@@ -87,6 +104,58 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         middleLayout.add(dateLayout, oddsLayout);
         gridItem.add(homeTeamLayout, middleLayout, awayTeamLayout);
         return gridItem;
+    }
+
+    private void placeBet(String button, MatchWithOdds matchWithOdds) {
+        float odd = getOddBasedOnButtonType(button, matchWithOdds);
+        BetType betType = getBetTypeBasedOnButtonType(button);
+
+        Bet foundBet = findBet(matchWithOdds);
+
+        if(foundBet == null) {
+            Bet bet = new Bet(AuthService.currentUserID, matchWithOdds.getHomeTeam(), matchWithOdds.getAwayTeam(), betType, round2Decimals(odd), matchWithOdds.getMatchDate(), false);
+            betService.createBet(bet);
+        }
+        else {
+            betService.deleteBetById(foundBet.getId());
+            foundBet.setBetType(betType);
+            foundBet.setOdd(round2Decimals(odd));
+            betService.createBet(foundBet);
+        }
+
+    }
+
+    private Bet findBet(MatchWithOdds matchWithOdds) {
+        List<Bet> foundBets = betService.getAllCurrentBetsOfUser(AuthService.currentUserID);
+        for(Bet bet : foundBets) {
+            if(bet.getHomeTeam().equals(matchWithOdds.getHomeTeam()) && bet.getAwayTeam().equals(matchWithOdds.getAwayTeam()) &&
+            bet.getDate().isEqual(matchWithOdds.getMatchDate())) {
+                return bet;
+            }
+        }
+        return null;
+    }
+
+    private double round2Decimals(double f) {
+        return (Math.round(f * 100.0) / 100.0);
+    }
+
+    private float getOddBasedOnButtonType(String button, MatchWithOdds matchWithOdds) {
+        if(button.equals("home"))
+            return matchWithOdds.getBetOdds().getHomeWin();
+        else if(button.equals("draw"))
+            return matchWithOdds.getBetOdds().getDraw();
+        else
+            return matchWithOdds.getBetOdds().getAwayWin();
+    }
+
+    private BetType getBetTypeBasedOnButtonType(String button){
+        if(button.equals("home"))
+            return BetType.ONE;
+        else if(button.equals("draw"))
+            return BetType.X;
+        else
+            return BetType.TWO;
     }
 
     @Override
