@@ -6,6 +6,8 @@ import com.example.application.data.entity.BettingTicket;
 import com.example.application.data.service.AuthService;
 import com.example.application.data.service.BetService;
 import com.example.application.data.service.BettingTicketService;
+import com.example.application.views.mybets.MybetsView;
+import com.example.application.views.wallet.WalletView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -13,8 +15,11 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -23,8 +28,8 @@ import com.vaadin.flow.router.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @PageTitle("Current ticket")
@@ -35,15 +40,19 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
 
     private BetService betService;
     private BettingTicketService bettingTicketService;
+    private AuthService authService;
 
     private String betIDs;
     private double finalOdd;
     private double possibleAmountToWin;
+    private double amountPlaced;
 
-    public CurrentticketView(@Autowired BetService betService, @Autowired BettingTicketService bettingTicketService) {
+    public CurrentticketView(@Autowired BetService betService, @Autowired BettingTicketService bettingTicketService,
+                             @Autowired AuthService authService) {
         setId("currentticket-view");
         this.betService = betService;
         this.bettingTicketService = bettingTicketService;
+        this.authService = authService;
         addClassName("currentticket-view");
         setSizeFull();
         grid.setHeight("100%");
@@ -72,13 +81,41 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
         description.setSpacing(false);
         description.setPadding(false);
 
-        if(betDisplay.getBetDisplayTipe() == BetDisplayType.BET) {
+        if (betDisplay.getBetDisplayTipe() == BetDisplayType.BET) {
             Image imageHome = new Image();
             imageHome.setSrc(betDisplay.getImageHome());
             imageHome.addClassName("imageHome");
+            Span nameTeamHome = new Span(betDisplay.getNameTeamHome());
+            nameTeamHome.addClassName("nameTeamHome");
+
             Image imageAway = new Image();
+            Span nameTeamAway = new Span(betDisplay.getNameTeamAway());
+            nameTeamHome.addClassName("nameTeamAway");
             imageAway.setSrc(betDisplay.getImageAway());
             imageAway.addClassName("imageAway");
+
+            Label space1 = new Label("_____");
+            space1.getStyle().set("color", "white");
+            Label space2 = new Label("_____");
+            space2.getStyle().set("color", "white");
+
+            Span vs = new Span("-");
+            Span status = new Span("");
+            Span wonOrLost = new Span("");
+            IronIcon wonOrLostIcon = new IronIcon("vaadin", "play-arrow");
+            if (betDisplay.isPlaced()) {
+                if (betDisplay.getOngoing().equals("finished")) {
+                    vs.setText(betDisplay.getScoreHome() + "-" + betDisplay.getScoreAway());
+                    String wonOrLostSt = betDisplay.isWon() ? "won" : "lost";
+                    wonOrLost.setText(wonOrLostSt);
+                    String wonOrLostIconSt = betDisplay.isWon() ? "check" : "close";
+                    wonOrLostIcon = new IronIcon("vaadin", wonOrLostIconSt);
+                }
+                status.setText(betDisplay.getOngoing());
+            }
+            HorizontalLayout winStatus = new HorizontalLayout();
+            winStatus.add(wonOrLost, wonOrLostIcon);
+            winStatus.setAlignItems(FlexComponent.Alignment.CENTER);
 
 
             HorizontalLayout header = new HorizontalLayout();
@@ -86,96 +123,210 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
             header.setSpacing(false);
             header.getThemeList().add("spacing-s");
 
-            Span nameTeamHome = new Span(betDisplay.getNameTeamHome());
-            nameTeamHome.addClassName("nameTeamHome");
-            Span nameTeamAway = new Span(betDisplay.getNameTeamAway());
-            nameTeamHome.addClassName("nameTeamAway");
+
             Span date = new Span(betDisplay.getDate());
             date.addClassName("date");
-            header.add(nameTeamHome, nameTeamAway, date);
+            Span time = new Span(betDisplay.getTime());
+            time.addClassName("time");
+            header.add(imageHome, nameTeamHome, space1, vs, space2, nameTeamAway, imageAway);
+            header.setAlignItems(FlexComponent.Alignment.CENTER);
 
+            HorizontalLayout betTypeLayout = new HorizontalLayout();
+            Span titleBetType = new Span("You have bet on: ");
             Span betType = new Span(betDisplay.getBetType());
             betType.addClassName("betType");
+            betTypeLayout.add(titleBetType, betType);
+
+            HorizontalLayout oddLayout = new HorizontalLayout();
+            Span titleOdd = new Span("Odd:");
             Span odd = new Span(betDisplay.getOdd());
             betType.addClassName("odd");
+            oddLayout.add(titleOdd, odd);
 
-            description.add(header, betType, odd);
-            card.add(imageHome, imageAway, description);
-        } else if(betDisplay.getBetDisplayTipe() == BetDisplayType.FINISHBET) {
-            Text textTitleFinalOdd = new Text("Odd: ");
-            Text textFinalOdd = new Text(betDisplay.getFinalOdd());
+            HorizontalLayout dateAndTime = new HorizontalLayout();
+            dateAndTime.add(date, time);
+            dateAndTime.setAlignItems(FlexComponent.Alignment.CENTER);
 
-            HorizontalLayout amountAndPlace = new HorizontalLayout();
-            Text textTitleAmountToBet = new Text("Amount: ");
-            TextField textFieldAmountToBet = new TextField();
-            Text textTitlePossibleSumToWin = new Text("Possible sum to win: ");
-            Text textPossibleSumToWin = new Text("0");
-            textFieldAmountToBet.setValueChangeMode(ValueChangeMode.EAGER);
-            textFieldAmountToBet.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>() {
-                @Override
-                public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> textFieldStringComponentValueChangeEvent) {
-                    try {
-                        possibleAmountToWin = Double.parseDouble(betDisplay.getFinalOdd()) * Double.parseDouble(textFieldAmountToBet.getValue());
-                        possibleAmountToWin = round(possibleAmountToWin, 2);
-                        textPossibleSumToWin.setText(String.valueOf(possibleAmountToWin));
-                    } catch (NumberFormatException e) {
-                        textPossibleSumToWin.setText("0");
-                    }
-                }
-            });
-            Button buttonPlaceBet = new Button("Place bet");
-
-            buttonPlaceBet.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            Button buttonDeleteBet = new Button("Delete");
+            buttonDeleteBet.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
                 @Override
                 public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                    BettingTicket bettingTicket = new BettingTicket(AuthService.currentUserID,
-                            betIDs, finalOdd,
-                            possibleAmountToWin, false, false,
-                            LocalDate.now());
-                    bettingTicketService.addBettingTicket(bettingTicket);
-                    Notification.show("Bet placed!");
-                    betService.setAllBetsPlaced(AuthService.currentUserID);
+                    betService.deleteBetById(betDisplay.getBetId());
                     UI.getCurrent().getPage().reload();
                 }
             });
 
-            amountAndPlace.add(textTitleAmountToBet, textFieldAmountToBet, textTitlePossibleSumToWin, textPossibleSumToWin);
-            description.add(textTitleFinalOdd, textFinalOdd, amountAndPlace, buttonPlaceBet);
-            card.add(description);
+            description.add(header, dateAndTime, betTypeLayout, oddLayout, status, winStatus);
+            if(!betDisplay.isPlaced()) {
+                description.add(buttonDeleteBet);
+            }
+
+        } else {
+            Span textTitleFinalOdd = new Span("Odd: ");
+            Span textFinalOdd = new Span(betDisplay.getFinalOdd());
+
+            HorizontalLayout amountAndPlace = new HorizontalLayout();
+            Span textTitlePossibleSumToWin = new Span("Possible sum to win: ");
+            Span textPossibleSumToWin = new Span("0");
+
+            Button buttonPlaceBet = new Button("Place bet");
+            buttonPlaceBet.setEnabled(false);
+
+            if (betDisplay.getBetDisplayTipe() == BetDisplayType.FINISH_CREATING_BET) {
+                Span textTitleAmountToBet = new Span("Amount: ");
+                TextField textFieldAmountToBet = new TextField();
+                textFieldAmountToBet.setValueChangeMode(ValueChangeMode.EAGER);
+                textFieldAmountToBet.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>() {
+                    @Override
+                    public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> textFieldStringComponentValueChangeEvent) {
+                        try {
+                            possibleAmountToWin = Double.parseDouble(betDisplay.getFinalOdd()) * Double.parseDouble(textFieldAmountToBet.getValue());
+                            possibleAmountToWin = round(possibleAmountToWin, 2);
+                            amountPlaced = Double.parseDouble(textFieldAmountToBet.getValue());
+                            textPossibleSumToWin.setText(String.valueOf(possibleAmountToWin));
+                            buttonPlaceBet.setEnabled(true);
+                        } catch (NumberFormatException e) {
+                            textPossibleSumToWin.setText("0");
+                            buttonPlaceBet.setEnabled(false);
+                        }
+                    }
+                });
+
+
+                buttonPlaceBet.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+                    @Override
+                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                        if(amountPlaced <= WalletView.currentBalance) {
+                            WalletView.updateCurrentBalance(-amountPlaced);
+                            authService.updateBalance(WalletView.currentBalance);
+                            BettingTicket bettingTicket = new BettingTicket(AuthService.currentUserID,
+                                    betIDs, finalOdd,
+                                    possibleAmountToWin, amountPlaced,
+                                    true, false,
+                                    LocalDate.now(),
+                                    false);
+                            bettingTicketService.addBettingTicket(bettingTicket);
+                            Notification.show("Bet placed!");
+                            betService.setAllBetsPlaced(AuthService.currentUserID);
+                            UI.getCurrent().getPage().setLocation("mybets");
+                        } else {
+                            Notification.show("Insufficient funds!");
+                        }
+                    }
+                });
+
+                Button buttonDeleteAll = new Button("Delete all");
+                buttonDeleteAll.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+                    @Override
+                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                        betService.deleteAllUnplacedBetsOfId(AuthService.currentUserID);
+                        UI.getCurrent().getPage().reload();
+                    }
+                });
+
+                amountAndPlace.add(textTitleAmountToBet, textFieldAmountToBet, textTitlePossibleSumToWin, textPossibleSumToWin);
+                description.add(textTitleFinalOdd, textFinalOdd, amountAndPlace, buttonPlaceBet, buttonDeleteAll);
+            } else if (betDisplay.getBetDisplayTipe() == BetDisplayType.FINISHED_BET) {
+                if (betDisplay.getOngoing().equals("finished")) {
+                    textTitlePossibleSumToWin.setText("Won: ");
+                    if (betDisplay.isWon()) {
+                        textPossibleSumToWin.setText(betDisplay.getPossibleAmountToWin());
+                    } else {
+                        textPossibleSumToWin.setText("0");
+                    }
+                } else {
+                    textPossibleSumToWin.setText(betDisplay.getPossibleAmountToWin());
+                }
+                Button buttonClose = new Button("Close");
+                buttonClose.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+                    @Override
+                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                        MybetsView.betIDs = null;
+                        UI.getCurrent().getPage().setLocation("mybets");
+                    }
+                });
+                HorizontalLayout layoutAmoundPlaced = new HorizontalLayout();
+                Span titleAmountPlaced = new Span("Amount placed:");
+                Span amountPlaced = new Span(betDisplay.getAmountPlaced());
+                layoutAmoundPlaced.add(titleAmountPlaced, amountPlaced);
+                amountAndPlace.add(textTitlePossibleSumToWin, textPossibleSumToWin);
+                description.add(textTitleFinalOdd, textFinalOdd, layoutAmoundPlaced, amountAndPlace, buttonClose);
+            }
         }
+        card.add(description);
         return card;
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-
-        List<Bet> bets = betService.getAllCurrentBetsOfUser(AuthService.currentUserID);
+        boolean placeBetMode = true;
+        boolean ongoing = false;
+        boolean betLost = false;
+        boolean won = true;
 
         List<BetDisplay> betDisplays = new ArrayList<>();
-        finalOdd = 1;
-        StringBuilder betIDs = new StringBuilder();
-        for(Bet bet : bets) {
-            String imageHome, imageAway;
-            imageHome = getTeamLogo(bet.getHomeTeam());
-            imageAway = getTeamLogo(bet.getAwayTeam());
-            betDisplays.add(createBet(imageHome, imageAway, bet.getHomeTeam(), bet.getAwayTeam(),
-                    bet.getDate(), bet.getBetType(), bet.getOdd()));
-            finalOdd *= bet.getOdd();
-            betIDs.append(bet.getId());
-            betIDs.append("_");
+        List<Bet> bets;
+
+        if (!betService.isEmpty()) {
+            if (!betService.noCurrentBetsOfUser(AuthService.currentUserID)) {
+                bets = betService.getAllCurrentBetsOfUser(AuthService.currentUserID);
+            } else {
+                bets = new ArrayList<>();
+                this.betIDs = MybetsView.betIDs;
+                if (this.betIDs == null) {
+                    grid.setItems(betDisplays);
+                    return;
+                }
+                placeBetMode = false;
+                String[] betIDs = this.betIDs.split("_");
+                for (String betIDString : betIDs) {
+                    int betID = Integer.parseInt(betIDString);
+                    bets.add(betService.getBetByID(betID));
+                }
+            }
+
+            finalOdd = 1;
+            StringBuilder betIDs = new StringBuilder();
+            for (Bet bet : bets) {
+                String imageHome, imageAway;
+                imageHome = getTeamLogo(bet.getHomeTeam());
+                imageAway = getTeamLogo(bet.getAwayTeam());
+                betDisplays.add(createBet(bet.getId(), imageHome, imageAway, bet.getHomeTeam(), bet.getAwayTeam(),
+                        bet.getDate(), bet.getTime(),
+                        bet.getBetType(), bet.getOdd(),
+                        bet.isFinished(), bet.getScoreHome(), bet.getScoreAway(), bet.isPlaced(),
+                        bet.isWon()));
+                finalOdd *= bet.getOdd();
+                if (!bet.isFinished()) {
+                    ongoing = true;
+                }
+                if (placeBetMode) {
+                    betIDs.append(bet.getId());
+                    betIDs.append("_");
+                }
+                if (bet.isFinished() && !bet.isWon()) {
+                    betLost = true;
+                }
+                if(!bet.isWon()) {
+                    won = false;
+                }
+            }
+            finalOdd = round(finalOdd, 2);
+            if (placeBetMode) {
+                betIDs.deleteCharAt(betIDs.length() - 1); //delete last _
+                betDisplays.add(finishCreatingBet(finalOdd, betIDs.toString()));
+                this.betIDs = betIDs.toString();
+            } else {
+                betDisplays.add(finishedBet(ongoing, finalOdd, MybetsView.possibleAmountToWin, betLost, won, MybetsView.amountPlaced));
+            }
         }
-        finalOdd = round(finalOdd, 2);
-        if(!betIDs.toString().equals("")) {
-            betIDs.deleteCharAt(betIDs.length() - 1); //delete last _
-            betDisplays.add(finishBet(finalOdd, betIDs.toString()));
-            this.betIDs = betIDs.toString();
-        }
+
 
         grid.setItems(betDisplays);
     }
 
     private String getTeamLogo(String teamName) {
-        switch(teamName) {
+        switch (teamName) {
             case "Academica Clinceni":
                 return "https://lpf.ro/imagini-stiri/echipa/72/5e5372c76a33bechipa__0004_Layer-9.png";
             case "Din. Bucuresti":
@@ -213,24 +364,44 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
         }
     }
 
-    private static BetDisplay createBet(String imageHome, String imageAway, String nameTeamHome, String nameTeamAway
-            , LocalDate date, BetType betType, double odd){
+    private static BetDisplay createBet(int id, String imageHome, String imageAway, String nameTeamHome, String nameTeamAway,
+                                        LocalDate date, LocalTime time, BetType betType, double odd, boolean finished, int scoreHome, int scoreAway,
+                                        boolean placed,
+                                        boolean won) {
         BetDisplay b = new BetDisplay();
+        b.setBetId(id);
         b.setBetDisplayTipe(BetDisplayType.BET);
         b.setImageHome(imageHome);
         b.setImageAway(imageAway);
         b.setNameTeamHome(nameTeamHome);
         b.setNameTeamAway(nameTeamAway);
         b.setDate(date.toString());
+        b.setTime(time.toString());
+        b.setOngoing(finished ? "finished" : "ongoing");
+        b.setScoreHome(String.valueOf(scoreHome));
+        b.setScoreAway(String.valueOf(scoreAway));
+        b.setPlaced(placed);
+        b.setWon(won);
 
         String betTypeString;
-        switch(betType) {
-            case X: betTypeString = "X"; break;
-            case ONE: betTypeString = "1"; break;
-            case TWO: betTypeString = "2"; break;
-            case ONEX: betTypeString = "1X"; break;
-            case TWOX: betTypeString = "2x"; break;
-            default: betTypeString = "error";
+        switch (betType) {
+            case X:
+                betTypeString = "X";
+                break;
+            case ONE:
+                betTypeString = "1";
+                break;
+            case TWO:
+                betTypeString = "2";
+                break;
+            case ONEX:
+                betTypeString = "1X";
+                break;
+            case TWOX:
+                betTypeString = "2x";
+                break;
+            default:
+                betTypeString = "error";
         }
         b.setBetType(betTypeString);
         b.setOdd(String.valueOf(odd));
@@ -238,11 +409,27 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
         return b;
     }
 
-    private static BetDisplay finishBet(double finalOdd, String betIDs) {
+    private static BetDisplay finishCreatingBet(double finalOdd, String betIDs) {
         BetDisplay b = new BetDisplay();
-        b.setBetDisplayTipe(BetDisplayType.FINISHBET);
+        b.setBetDisplayTipe(BetDisplayType.FINISH_CREATING_BET);
         b.setFinalOdd(String.valueOf(finalOdd));
         b.setBetIDs(betIDs);
+        return b;
+    }
+
+    private static BetDisplay finishedBet(boolean ongoing, double finalOdd, String possibleAmountToWin, boolean betLost,
+                                          boolean won, String amountPlaced) {
+        BetDisplay b = new BetDisplay();
+        b.setBetDisplayTipe(BetDisplayType.FINISHED_BET);
+        if(betLost) {
+            b.setOngoing("finished");
+        } else {
+            b.setOngoing(ongoing ? "ongoing" : "finished");
+        }
+        b.setFinalOdd(String.valueOf(finalOdd));
+        b.setPossibleAmountToWin(possibleAmountToWin);
+        b.setAmountPlaced(amountPlaced);
+        b.setWon(won);
         return b;
     }
 

@@ -25,4 +25,23 @@ public class BettingTicketService {
         return bettingTicketRepository.getAllByUserID(userID);
     }
 
+    public void setTicketWon(BettingTicket bettingTicket) {
+        BettingTicket existingTicket = bettingTicketRepository.findById(bettingTicket.getId()).orElse(null);
+        existingTicket.setOngoing(false);
+        existingTicket.setWon(true);
+        bettingTicketRepository.save(existingTicket);
+    }
+
+    public void setTicketLost(BettingTicket bettingTicket) {
+        BettingTicket existingTicket = bettingTicketRepository.findById(bettingTicket.getId()).orElse(null);
+        existingTicket.setOngoing(false);
+        existingTicket.setWon(false);
+        bettingTicketRepository.save(existingTicket);
+    }
+
+    public void setCashedIn(BettingTicket bettingTicket) {
+        BettingTicket existingTicket = bettingTicketRepository.findById(bettingTicket.getId()).orElse(null);
+        existingTicket.setCashedIn(true);
+        bettingTicketRepository.save(existingTicket);
+    }
 }

@@ -5,6 +5,7 @@ import com.example.application.data.service.UpcomingMatchService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -21,8 +22,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
 
-@Route(value = "addmatches")
 @PageTitle("Add upcoming matches")
+@CssImport(value = "./styles/views/addresult/addresult-view.css", include = "lumo-badge")
 public class UpcomingMatchesAdderView extends VerticalLayout {
 
     private UpcomingMatchService upcomingMatchService;
@@ -62,7 +63,6 @@ public class UpcomingMatchesAdderView extends VerticalLayout {
     }
 
     private void updateGrid() {
-        List<UpcomingMatch> d = upcomingMatchService.findAll();
         grid.setItems(upcomingMatchService.findAll());
     }
 

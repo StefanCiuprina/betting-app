@@ -1,32 +1,30 @@
 package com.example.application.views.mybets;
 
-import com.example.application.data.entity.Bet;
 import com.example.application.data.entity.BettingTicket;
 import com.example.application.data.service.AuthService;
+import com.example.application.data.service.BetService;
 import com.example.application.data.service.BettingTicketService;
-import com.example.application.views.currentticket.BetDisplay;
-import com.example.application.views.main.MainView;
-import com.vaadin.flow.component.Text;
+import com.example.application.views.wallet.WalletView;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @PageTitle("My bets")
@@ -36,10 +34,19 @@ public class MybetsView extends Div implements AfterNavigationObserver {
     Grid<BettingTicketDisplay> grid = new Grid<>();
 
     private BettingTicketService bettingTicketService;
+    private BetService betService;
+    private AuthService authService;
 
-    public MybetsView(@Autowired BettingTicketService bettingTicketService) {
+    public static String possibleAmountToWin;
+    public static String amountPlaced;
+    public static String betIDs;
+
+    public MybetsView(@Autowired BettingTicketService bettingTicketService, @Autowired BetService betService,
+                      @Autowired AuthService authService) {
         setId("mybets-view");
         this.bettingTicketService = bettingTicketService;
+        this.betService = betService;
+        this.authService = authService;
         addClassName("mybets-view");
         setSizeFull();
         grid.setHeight("100%");
@@ -59,31 +66,31 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         description.setSpacing(false);
         description.setPadding(false);
 
-        Label space = new Label("_____");
-        space.getStyle().set("color", "white");
-
-        Label space2 = new Label("_____");
-        space2.getStyle().set("color", "white");
-
         HorizontalLayout left = new HorizontalLayout();
         String titlePossibleAmountToWinString = bettingTicketDisplay.getOngoing().equals("ongoing") ?
                 "Possible amount to win: " : "Won: ";
-        Text titlePossibleAmountToWin = new Text(titlePossibleAmountToWinString);
+        Span titlePossibleAmountToWin = new Span(titlePossibleAmountToWinString);
         Span possibleAmountToWin = new Span(bettingTicketDisplay.getPossibleAmountToWin());
         possibleAmountToWin.addClassName("possibleAmountToWin");
         left.add(titlePossibleAmountToWin, possibleAmountToWin);
 
-        HorizontalLayout middle = new HorizontalLayout();
-        Text titleOdd = new Text("Odd: ");
+        VerticalLayout middle = new VerticalLayout();
+        HorizontalLayout middleTop = new HorizontalLayout();
+        Span textTitleAmountPlaced = new Span("Amount placed:");
+        Span textAmountPlaced = new Span(bettingTicketDisplay.getAmountPlaced());
+        middleTop.add(textTitleAmountPlaced, textAmountPlaced);
+        HorizontalLayout middleBottom = new HorizontalLayout();
+        Span titleOdd = new Span("Odd: ");
         Span odd = new Span(bettingTicketDisplay.getOdd());
         odd.addClassName("odd");
-        middle.add(titleOdd, odd);
+        middleBottom.add(titleOdd, odd);
+        middle.add(middleTop, middleBottom);
         middle.getStyle().set("width", "100%");
 
         HorizontalLayout right = new HorizontalLayout();
         right.setSpacing(false);
         right.setPadding(false);
-        Text titleDatePlaced = new Text("Date Placed: ");
+        Span titleDatePlaced = new Span("Date Placed: ");
         Span datePlaced = new Span(bettingTicketDisplay.getDatePlaced());
         datePlaced.addClassName("datePlaced");
         right.add(titleDatePlaced, datePlaced);
@@ -100,16 +107,52 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         wonOrLost.addClassName("wonOrLost");
         IronIcon wonOrLostIcon = new IronIcon("vaadin", bettingTicketDisplay.getWonOrLostIcon());
 
+        Button buttonViewTicket = new Button("View ticket");
+        Button buttonDeleteTicket = new Button("Delete");
+
         if(bettingTicketDisplay.getOngoing().equals("ongoing")) {
             status.add(ongoing, ongoingIcon);
+            buttonDeleteTicket.setEnabled(false);
         } else {
             status.add(ongoing, ongoingIcon, wonOrLost, wonOrLostIcon);
         }
+
+        status.add(buttonViewTicket, buttonDeleteTicket);
+
+        buttonViewTicket.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                if(betService.noCurrentBetsOfUser(AuthService.currentUserID)) {
+                    betIDs = bettingTicketDisplay.getBetIDs();
+                    MybetsView.possibleAmountToWin = bettingTicketDisplay.getPossibleAmountToWin();
+                    MybetsView.amountPlaced = bettingTicketDisplay.getAmountPlaced();
+                    UI.getCurrent().getPage().setLocation("currentticket");
+                } else {
+                    Notification.show("Please finish/delete your Current Ticket first.");
+                    betIDs = null;
+                }
+            }
+        });
+
+        buttonDeleteTicket.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                String[] betIDs = bettingTicketDisplay.getBetIDs().split("_");
+                for(String betIDString : betIDs) {
+                    int betID = Integer.parseInt(betIDString);
+                    betService.deleteBetById(betID);
+                }
+                bettingTicketService.deleteBettingTicketById(bettingTicketDisplay.getId());
+                UI.getCurrent().getPage().reload();
+            }
+        });
+
 
         description.add(left, status);
         card.add(description, middle, right);
         return card;
     }
+
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
@@ -119,6 +162,23 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         List<BettingTicketDisplay> bettingTicketDisplays = new ArrayList<>();
 
         for(BettingTicket bettingTicket : bettingTickets) {
+            boolean ticketWon = checkTicketWon(bettingTicket);
+            boolean ticketLost = checkTicketLost(bettingTicket);
+            if(ticketWon) {
+                bettingTicketService.setTicketWon(bettingTicket);
+                bettingTicket.setOngoing(false);
+                bettingTicket.setWon(true);
+                if(!bettingTicket.isCashedIn()) {
+                    WalletView.updateCurrentBalance(bettingTicket.getPossibleAmountToWin());
+                    authService.updateBalance(WalletView.currentBalance);
+                    bettingTicketService.setCashedIn(bettingTicket);
+                }
+            } else if(ticketLost) {
+                bettingTicketService.setTicketLost(bettingTicket);
+                bettingTicket.setOngoing(false);
+                bettingTicket.setWon(false);
+            }
+
             String ongoing = bettingTicket.isOngoing() ? "ongoing" : "finished";
             String ongoingIcon = bettingTicket.isOngoing() ? "forward" : "check";
             String wonOrLost = bettingTicket.isWon() ? "won" : "lost";
@@ -137,12 +197,37 @@ public class MybetsView extends Div implements AfterNavigationObserver {
 
             bettingTicketDisplays.add(new BettingTicketDisplay(String.valueOf(bettingTicket.getOdd()),
                     possibleAmountToWin,
+                    String.valueOf(bettingTicket.getAmountPlaced()),
                     bettingTicket.getDatePlaced().toString(),
                     ongoing, ongoingIcon,
-                    wonOrLost, wonOrLostIcon));
+                    wonOrLost, wonOrLostIcon,
+                    bettingTicket.getBetIDs(),
+                    bettingTicket.getId()));
         }
 
         grid.setItems(bettingTicketDisplays);
+    }
+
+    private boolean checkTicketLost(BettingTicket bettingTicket) {
+        String[] betIDs = bettingTicket.getBetIDs().split("_");
+        for(String betIDString : betIDs) {
+            int betID = Integer.parseInt(betIDString);
+            if(betService.isBetFinishedAndLostById(betID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkTicketWon(BettingTicket bettingTicket) {
+        String[] betIDs = bettingTicket.getBetIDs().split("_");
+        for(String betIDString : betIDs) {
+            int betID = Integer.parseInt(betIDString);
+            if(!betService.isBetWonById(betID)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

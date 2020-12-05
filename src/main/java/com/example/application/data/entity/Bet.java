@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -22,5 +23,14 @@ public class Bet extends AbstractEntity {
     private BetType betType;
     private double odd;
     private LocalDate date;
+    private LocalTime time;
     private boolean placed;
+    private boolean finished;
+    private int scoreHome;
+    private int scoreAway;
+    private boolean won;
+
+    public Bet(int currentUserID, String homeTeam, String awayTeam, BetType betType, double round2Decimals, LocalDate matchDate, LocalTime matchTime, boolean b) {
+        this(currentUserID, homeTeam, awayTeam, betType, round2Decimals, matchDate, matchTime, b, false, 0, 0, false);
+    }
 }

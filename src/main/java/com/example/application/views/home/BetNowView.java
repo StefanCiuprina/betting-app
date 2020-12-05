@@ -113,7 +113,9 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         Bet foundBet = findBet(matchWithOdds);
 
         if(foundBet == null) {
-            Bet bet = new Bet(AuthService.currentUserID, matchWithOdds.getHomeTeam(), matchWithOdds.getAwayTeam(), betType, round2Decimals(odd), matchWithOdds.getMatchDate(), false);
+            Bet bet = new Bet(AuthService.currentUserID, matchWithOdds.getHomeTeam(), matchWithOdds.getAwayTeam(), betType,
+                    round2Decimals(odd), matchWithOdds.getMatchDate(),
+                    matchWithOdds.getMatchTime(), false);
             betService.createBet(bet);
         }
         else {
@@ -129,7 +131,7 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         List<Bet> foundBets = betService.getAllCurrentBetsOfUser(AuthService.currentUserID);
         for(Bet bet : foundBets) {
             if(bet.getHomeTeam().equals(matchWithOdds.getHomeTeam()) && bet.getAwayTeam().equals(matchWithOdds.getAwayTeam()) &&
-            bet.getDate().isEqual(matchWithOdds.getMatchDate())) {
+            bet.getDate().isEqual(matchWithOdds.getMatchDate()) && bet.getTime().equals(matchWithOdds.getMatchTime())) {
                 return bet;
             }
         }
