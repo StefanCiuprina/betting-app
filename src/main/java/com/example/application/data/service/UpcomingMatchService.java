@@ -18,7 +18,7 @@ public class UpcomingMatchService {
         this.upcomingMatchesRepository = upcomingMatchesRepository;
     }
 
-    public List<String> getFirstLeagueCurrentTeams() {
+    public static List<String> getFirstLeagueCurrentTeams() {
         List<String> teams = new ArrayList<>();
         teams.add("FC Steaua Bucuresti");
         teams.add("U Craiova");
