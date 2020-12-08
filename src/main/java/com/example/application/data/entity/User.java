@@ -21,6 +21,8 @@ public class User extends AbstractEntity {
     private String fullName;
     private LocalDate dateOfBirth;
 
+    private double balance;
+
     public User() {
     }
 
@@ -33,6 +35,7 @@ public class User extends AbstractEntity {
         this.email = email;
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
+        this.balance = 0;
     }
 
     public boolean checkPassword(String password) {
@@ -94,5 +97,13 @@ public class User extends AbstractEntity {
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }

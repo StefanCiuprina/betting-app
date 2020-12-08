@@ -19,7 +19,10 @@ public class BettingTicket extends AbstractEntity {
     private String betIDs;
     private double odd;
     private double possibleAmountToWin;
+    private double amountPlaced;
     private boolean ongoing;
     private boolean won;
     private LocalDate datePlaced;
+
+    private boolean cashedIn;
 }

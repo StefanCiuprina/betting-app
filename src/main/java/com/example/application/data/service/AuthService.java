@@ -3,6 +3,7 @@ package com.example.application.data.service;
 import com.example.application.data.entity.Role;
 import com.example.application.data.entity.User;
 import com.example.application.data.repositories.UserRepository;
+import com.example.application.views.addresult.AddResultView;
 import com.example.application.views.admin.AdminView;
 import com.example.application.views.currentticket.CurrentticketView;
 import com.example.application.views.home.BetNowView;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
-import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +30,17 @@ public class AuthService extends CrudService<User, Integer> {
     @Override
     protected JpaRepository<User, Integer> getRepository() {
         return userRepository;
+    }
+
+    public double getBalance() {
+        User existingUser =  userRepository.findById(currentUserID).orElse(null);
+        return existingUser.getBalance();
+    }
+
+    public void updateBalance(double balance) {
+        User existingUser = userRepository.findById(currentUserID).orElse(null);
+        existingUser.setBalance(balance);
+        userRepository.save(existingUser);
     }
 
     public static class AuthorizedRoute{
@@ -89,8 +100,9 @@ public class AuthService extends CrudService<User, Integer> {
         } else if (role.equals(Role.ADMIN)) {
             routes.add(new AuthorizedRoute("home", "Bet Now", BetNowView.class));
             routes.add(new AuthorizedRoute("admin", "Admin", AdminView.class));
-            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class));
             routes.add(new AuthorizedRoute("addmatches", "Add upcoming matches", UpcomingMatchesAdderView.class));
+            routes.add(new AuthorizedRoute("addresult", "Add result", AddResultView.class));
+            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class));
         }
 
         return routes;

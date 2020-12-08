@@ -8,9 +8,13 @@ import lombok.Data;
 public class BettingTicketDisplay {
     private String odd;
     private String possibleAmountToWin;
+    private String amountPlaced;
     private String datePlaced;
     private String ongoing;
     private String ongoingIcon;
     private String wonOrLost;
     private String wonOrLostIcon;
+    private String betIDs;
+
+    private int id;
 }
