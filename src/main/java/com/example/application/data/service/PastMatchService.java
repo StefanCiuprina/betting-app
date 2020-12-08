@@ -40,4 +40,12 @@ public class PastMatchService {
         return pastMatchesRepository.getListOfTeams();
     }
 
+    public int getHowManyTimesTheFirstParameterTeamWonFromH2H(String teamToWin, String team2){
+        return pastMatchesRepository.getHowManyTimesTheFirstParameterTeamWonFromH2H(teamToWin, team2);
+    }
+
+    public int getHowManyDrawsFromH2H(String team1, String team2) {
+        return pastMatchesRepository.getHowManyDrawsFromH2H(team1, team2);
+    }
+
 }
