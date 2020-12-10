@@ -1,6 +1,7 @@
 package com.example.application.views.upcomingMatchesAdder;
 
 import com.example.application.data.entity.UpcomingMatch;
+import com.example.application.data.service.TeamsService;
 import com.example.application.data.service.UpcomingMatchService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -95,8 +96,8 @@ public class UpcomingMatchesAdderView extends VerticalLayout {
     }
 
     private void configureComboBox() {
-        homeTeamComboBox.setItems(upcomingMatchService.getFirstLeagueCurrentTeams());
-        awayTeamComboBox.setItems(upcomingMatchService.getFirstLeagueCurrentTeams());
+        homeTeamComboBox.setItems(TeamsService.getFirstLeagueCurrentTeams());
+        awayTeamComboBox.setItems(TeamsService.getFirstLeagueCurrentTeams());
         homeTeamComboBox.setLabel("Home team");
         awayTeamComboBox.setLabel("Away team");
         homeTeamComboBox.setAllowCustomValue(false);

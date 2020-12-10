@@ -74,15 +74,49 @@ public class OddsService {
             finalWin = percentageOfH2HGames * homeWinHead2Head + (1 - percentageOfH2HGames) * homeWinAllGames;
             finalDraw = percentageOfH2HGames * drawHead2Head + (1 - percentageOfH2HGames) * drawAllGames;
             finalLost = percentageOfH2HGames * awayWinHead2Head + (1 - percentageOfH2HGames) * awayWinAllGames;
-            finalDraw *= 0.8;
+            finalDraw *= 0.65;
         }else {
             finalWin =  homeWinAllGames;
             finalDraw = drawAllGames;
             finalLost = awayWinAllGames;
-            finalDraw *= 0.8;
+            finalDraw *= 0.65;
         }
+        return adjustBets(homeTeam, awayTeam, finalWin, finalDraw, finalLost);
+    }
 
-        return new BetOdds(round2Decimals(finalWin), round2Decimals(finalLost), round2Decimals(finalDraw));
+    private BetOdds adjustBets(String homeTeam, String awayTeam, float win, float draw, float lost) {
+        float finalWin = win;
+        float finalLost = lost;
+
+        float homeTeamValue = TeamsService.getTeamValue(homeTeam);
+        float awayTeamValue = TeamsService.getTeamValue(awayTeam);
+
+        if (homeTeamValue - awayTeamValue > 5 && finalWin > finalLost) {
+            float temp = finalWin;
+            finalWin = finalLost;
+            finalLost = temp;
+        }else if(awayTeamValue - homeTeamValue > 5 && finalLost > finalWin) {
+            float temp = finalLost;
+            finalLost = finalWin;
+            finalWin = temp;
+        }
+        if (finalWin >= 5) {
+            finalLost = 1 + finalLost - (int) finalLost;
+            if(finalLost > 1.5)
+                finalLost = 0.85f * finalLost;
+        }
+        if (finalLost >= 5) {
+            finalWin = 1 + finalWin - (int) finalWin;
+            if(finalWin > 1.5)
+                finalWin = 0.85f * finalWin;
+        }
+        if(finalWin > 6) {
+            finalWin = 0.85f * finalWin;
+        }
+        if(finalLost > 6) {
+            finalLost = 0.85f * finalLost;
+        }
+        return new BetOdds(round2Decimals(finalWin), round2Decimals(finalLost), round2Decimals(draw));
     }
 
     private float round2Decimals(float f) {

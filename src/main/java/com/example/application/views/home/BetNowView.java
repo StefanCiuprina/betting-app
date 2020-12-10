@@ -16,6 +16,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -85,9 +86,9 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         h4.add(goals);
 
         if(head2HeadMatch.getResult().equals("home")) {
-            homeTeam.getStyle().set("color", "red");
+            homeTeam.getStyle().set("color", "green");
         }else if(head2HeadMatch.getResult().equals("away")) {
-            awayTeam.getStyle().set("color", "red");
+            awayTeam.getStyle().set("color", "green");
         }else {
             homeTeam.getStyle().set("color", "blue");
             awayTeam.getStyle().set("color", "blue");
@@ -135,9 +136,13 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
             if(head2HeadLayout.isVisible() && (buttonThatOpenedTheGrid != null && buttonThatOpenedTheGrid == seeH2HComparisonButton)) {
                 head2HeadLayout.setVisible(false);
             }else {
-                head2HeadLayout.setVisible(true);
-                buttonThatOpenedTheGrid = seeH2HComparisonButton;
-                updateHead2HeadLayout(matchWithOdds);
+                if (teamsMet(matchWithOdds)){
+                    head2HeadLayout.setVisible(true);
+                    buttonThatOpenedTheGrid = seeH2HComparisonButton;
+                    updateHead2HeadLayout(matchWithOdds);
+                }else {
+                   Notification.show("The teams have not met before").setPosition(Notification.Position.TOP_CENTER);
+                }
             }
         });
 
@@ -169,6 +174,10 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         middleLayout.add(dateLayout, oddsLayout);
         gridItem.add(homeTeamLayout, middleLayout, awayTeamLayout,seeH2HComparisonButton);
         return gridItem;
+    }
+
+    private boolean teamsMet(MatchWithOdds matchWithOdds) {
+        return pastMatchService.haveTheTeamsMet(matchWithOdds.getHomeTeam(), matchWithOdds.getAwayTeam());
     }
 
     private void updateHead2HeadLayout(MatchWithOdds matchWithOdds) {

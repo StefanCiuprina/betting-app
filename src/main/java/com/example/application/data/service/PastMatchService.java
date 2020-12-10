@@ -48,4 +48,9 @@ public class PastMatchService {
         return pastMatchesRepository.getHowManyDrawsFromH2H(team1, team2);
     }
 
+    public boolean haveTheTeamsMet(String team1, String team2) {
+        List<PastMatch> p = getHead2HeadMatches(team1, team2);
+        return p != null && p.size() != 0;
+    }
+
 }
