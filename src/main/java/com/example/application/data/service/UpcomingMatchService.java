@@ -20,7 +20,7 @@ public class UpcomingMatchService {
 
     public List<UpcomingMatch> findAll() {
         deletePastMatches();
-        return upcomingMatchesRepository.findAll();
+        return upcomingMatchesRepository.getAllUpcomingMatchesSorted();
     }
 
     public void addUpcomingMatch(UpcomingMatch match) {
@@ -37,5 +37,10 @@ public class UpcomingMatchService {
     private void deletePastMatches() {
         upcomingMatchesRepository.deleteAllMatchesBeforeCurrentDate();
         upcomingMatchesRepository.deleteAllMatchesFromCurrentDateAndTimeDifferenceOf2Hours();
+    }
+
+    public List<UpcomingMatch> getUpcomingMatchesForUsers() {
+        deletePastMatches();
+        return upcomingMatchesRepository.getAllUpcomingMatchesForUsersToSee();
     }
 }

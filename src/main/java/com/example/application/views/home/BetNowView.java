@@ -219,9 +219,19 @@ public class BetNowView extends VerticalLayout implements AfterNavigationObserve
         v3.add(new Span(awayTeamWon + ""));
         v3.setAlignItems(Alignment.CENTER);
 
+        VerticalLayout averageHomeTeam = new VerticalLayout();
+        averageHomeTeam.add(new Span("Average goals per game " + matchWithOdds.getHomeTeam()));
+        averageHomeTeam.add(new Span("" + pastMatchService.getAverageGoalsForATeamInH2H(matchWithOdds.getHomeTeam(), matchWithOdds.getHomeTeam(), matchWithOdds.getAwayTeam())));
+        averageHomeTeam.setAlignItems(Alignment.CENTER);
+
+        VerticalLayout averageAwayTeam = new VerticalLayout();
+        averageAwayTeam.add(new Span("Average goals per game " + matchWithOdds.getAwayTeam()));
+        averageAwayTeam.add(new Span("" + pastMatchService.getAverageGoalsForATeamInH2H(matchWithOdds.getAwayTeam(), matchWithOdds.getHomeTeam(), matchWithOdds.getAwayTeam())));
+        averageAwayTeam.setAlignItems(Alignment.CENTER);
+
         buttonLayout.add(closeButton);
         buttonLayout.setAlignItems(Alignment.CENTER);
-        statistics.add(v1, v2, v3, buttonLayout);
+        statistics.add(v1, v2, v3,averageHomeTeam, averageAwayTeam, buttonLayout);
         return statistics;
     }
 

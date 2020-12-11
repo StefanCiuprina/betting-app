@@ -53,4 +53,14 @@ public class PastMatchService {
         return p != null && p.size() != 0;
     }
 
+    public float getAverageGoalsForATeamInH2H(String teamToGetAverage, String team1, String team2) {
+        return round2Decimals((float)(pastMatchesRepository.getSumOfGoalsWhenHomeTeam(teamToGetAverage, team1, team2) +
+                pastMatchesRepository.getSumOfGoalsWhenAwayTeam(teamToGetAverage, team1, team2)) /
+                (float) pastMatchesRepository.getNumberOfMatchesH2H(team1, team2));
+    }
+
+    private float round2Decimals(float f) {
+        return (float) ((float) Math.round(f * 100.0) / 100.0);
+    }
+
 }

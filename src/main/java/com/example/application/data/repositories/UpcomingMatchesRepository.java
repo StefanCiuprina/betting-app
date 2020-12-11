@@ -27,4 +27,10 @@ public interface UpcomingMatchesRepository extends JpaRepository<UpcomingMatch, 
     @Query(value = "delete from upcoming_matches where match_date = curdate() and match_time < curtime()", nativeQuery = true)
     void deleteAllMatchesFromCurrentDateAndTimeDifferenceOf2Hours();
 
+    @Query(value = "select * from upcoming_matches order by match_date , match_time", nativeQuery = true)
+    List<UpcomingMatch> getAllUpcomingMatchesSorted();
+
+    @Query(value = "select * from upcoming_matches where match_date < date_add(curdate(), interval 5 day) order by match_date , match_time", nativeQuery = true)
+    List<UpcomingMatch> getAllUpcomingMatchesForUsersToSee();
+
 }
