@@ -5,6 +5,7 @@ import com.example.application.data.entity.Result;
 import com.example.application.data.entity.UpcomingMatch;
 import com.example.application.data.service.BetService;
 import com.example.application.data.service.ResultService;
+import com.example.application.data.service.TeamsService;
 import com.example.application.data.service.UpcomingMatchService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -156,8 +157,8 @@ public class AddResultView extends VerticalLayout {
     }
 
     private void configureComboBox() {
-        homeTeamComboBox.setItems(UpcomingMatchService.getFirstLeagueCurrentTeams());
-        awayTeamComboBox.setItems(UpcomingMatchService.getFirstLeagueCurrentTeams());
+        homeTeamComboBox.setItems(TeamsService.getFirstLeagueCurrentTeams());
+        awayTeamComboBox.setItems(TeamsService.getFirstLeagueCurrentTeams());
         homeTeamComboBox.setLabel("Home team");
         awayTeamComboBox.setLabel("Away team");
         homeTeamComboBox.setAllowCustomValue(false);

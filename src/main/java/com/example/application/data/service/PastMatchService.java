@@ -40,4 +40,27 @@ public class PastMatchService {
         return pastMatchesRepository.getListOfTeams();
     }
 
+    public int getHowManyTimesTheFirstParameterTeamWonFromH2H(String teamToWin, String team2){
+        return pastMatchesRepository.getHowManyTimesTheFirstParameterTeamWonFromH2H(teamToWin, team2);
+    }
+
+    public int getHowManyDrawsFromH2H(String team1, String team2) {
+        return pastMatchesRepository.getHowManyDrawsFromH2H(team1, team2);
+    }
+
+    public boolean haveTheTeamsMet(String team1, String team2) {
+        List<PastMatch> p = getHead2HeadMatches(team1, team2);
+        return p != null && p.size() != 0;
+    }
+
+    public float getAverageGoalsForATeamInH2H(String teamToGetAverage, String team1, String team2) {
+        return round2Decimals((float)(pastMatchesRepository.getSumOfGoalsWhenHomeTeam(teamToGetAverage, team1, team2) +
+                pastMatchesRepository.getSumOfGoalsWhenAwayTeam(teamToGetAverage, team1, team2)) /
+                (float) pastMatchesRepository.getNumberOfMatchesH2H(team1, team2));
+    }
+
+    private float round2Decimals(float f) {
+        return (float) ((float) Math.round(f * 100.0) / 100.0);
+    }
+
 }

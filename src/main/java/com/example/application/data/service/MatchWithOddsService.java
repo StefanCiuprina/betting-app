@@ -60,7 +60,7 @@ public class MatchWithOddsService {
     public List<MatchWithOdds> getMatchesWithOdds() {
 
         List<MatchWithOdds> listOfMatchesWithOdds = new ArrayList<>();
-        List<UpcomingMatch> listOfUpcomingMatches = upcomingMatchService.findAll();
+        List<UpcomingMatch> listOfUpcomingMatches = upcomingMatchService.getUpcomingMatchesForUsers();
         listOfUpcomingMatches.forEach(match -> {
             MatchWithOdds matchWithOdds = new MatchWithOdds();
             matchWithOdds.setHomeTeam(match.getHome_team());
