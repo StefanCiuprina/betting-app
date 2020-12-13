@@ -1,5 +1,6 @@
 package com.example.application.views.mybets;
 
+import com.example.application.data.entity.Bet;
 import com.example.application.data.entity.BettingTicket;
 import com.example.application.data.service.AuthService;
 import com.example.application.data.service.BetService;
@@ -39,7 +40,8 @@ public class MybetsView extends Div implements AfterNavigationObserver {
 
     public static String possibleAmountToWin;
     public static String amountPlaced;
-    public static String betIDs;
+
+    public static int bettingTicketId;
 
     public MybetsView(@Autowired BettingTicketService bettingTicketService, @Autowired BetService betService,
                       @Autowired AuthService authService) {
@@ -123,13 +125,13 @@ public class MybetsView extends Div implements AfterNavigationObserver {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 if(betService.noCurrentBetsOfUser(AuthService.currentUserID)) {
-                    betIDs = bettingTicketDisplay.getBetIDs();
+                    bettingTicketId = bettingTicketDisplay.getId();
                     MybetsView.possibleAmountToWin = bettingTicketDisplay.getPossibleAmountToWin();
                     MybetsView.amountPlaced = bettingTicketDisplay.getAmountPlaced();
                     UI.getCurrent().getPage().setLocation("currentticket");
                 } else {
                     Notification.show("Please finish/delete your Current Ticket first.");
-                    betIDs = null;
+                    bettingTicketId = -1;
                 }
             }
         });
@@ -137,11 +139,7 @@ public class MybetsView extends Div implements AfterNavigationObserver {
         buttonDeleteTicket.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                String[] betIDs = bettingTicketDisplay.getBetIDs().split("_");
-                for(String betIDString : betIDs) {
-                    int betID = Integer.parseInt(betIDString);
-                    betService.deleteBetById(betID);
-                }
+                betService.deleteBetByTicketId(bettingTicketDisplay.getId());
                 bettingTicketService.deleteBettingTicketById(bettingTicketDisplay.getId());
                 UI.getCurrent().getPage().reload();
             }
@@ -177,6 +175,8 @@ public class MybetsView extends Div implements AfterNavigationObserver {
                 bettingTicketService.setTicketLost(bettingTicket);
                 bettingTicket.setOngoing(false);
                 bettingTicket.setWon(false);
+            } else {
+                bettingTicket.setOngoing(true);
             }
 
             String ongoing = bettingTicket.isOngoing() ? "ongoing" : "finished";
@@ -201,7 +201,6 @@ public class MybetsView extends Div implements AfterNavigationObserver {
                     bettingTicket.getDatePlaced().toString(),
                     ongoing, ongoingIcon,
                     wonOrLost, wonOrLostIcon,
-                    bettingTicket.getBetIDs(),
                     bettingTicket.getId()));
         }
 
@@ -209,10 +208,9 @@ public class MybetsView extends Div implements AfterNavigationObserver {
     }
 
     private boolean checkTicketLost(BettingTicket bettingTicket) {
-        String[] betIDs = bettingTicket.getBetIDs().split("_");
-        for(String betIDString : betIDs) {
-            int betID = Integer.parseInt(betIDString);
-            if(betService.isBetFinishedAndLostById(betID)) {
+        List<Bet> bets = betService.getAllBetsOfTicket(bettingTicket.getId());
+        for(Bet bet : bets) {
+            if(betService.isBetFinishedAndLostById(bet.getId())) {
                 return true;
             }
         }
@@ -220,14 +218,19 @@ public class MybetsView extends Div implements AfterNavigationObserver {
     }
 
     private boolean checkTicketWon(BettingTicket bettingTicket) {
-        String[] betIDs = bettingTicket.getBetIDs().split("_");
-        for(String betIDString : betIDs) {
-            int betID = Integer.parseInt(betIDString);
-            if(!betService.isBetWonById(betID)) {
-                return false;
+        List<Bet> bets = betService.getAllBetsOfTicket(bettingTicket.getId());
+        int noOfBets = 0;
+        int noOfBetsWon = 0;
+        for(Bet bet : bets) {
+            noOfBets++;
+            if(betService.isBetWonById(bet.getId())) {
+                noOfBetsWon++;
             }
         }
-        return true;
+        if(noOfBetsWon == noOfBets) {
+            return true;
+        }
+        return false;
     }
 
 }

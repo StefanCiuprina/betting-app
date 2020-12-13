@@ -3,6 +3,7 @@ package com.example.application.views.wallet;
 import com.example.application.data.service.AuthService;
 import com.example.application.views.currentticket.CurrentticketView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -45,7 +46,7 @@ public class WalletView extends Div {
                 updateCurrentBalance(Double.parseDouble(amount.getValue()));
                 authService.updateBalance(currentBalance);
                 currentBalanceSpan.setText(String.valueOf(currentBalance));
-                Notification.show("Money deposited.");
+                UI.getCurrent().getPage().reload();
             }
         });
         withdraw.addClickListener(e -> {
@@ -55,19 +56,13 @@ public class WalletView extends Div {
                     updateCurrentBalance(-amount);
                     authService.updateBalance(currentBalance);
                     currentBalanceSpan.setText(String.valueOf(currentBalance));
-                    Notification.show("Money withdrawn.");
+                    UI.getCurrent().getPage().reload();
                 } else {
                     Notification.show("Insufficient funds!");
                 }
             }
         });
     }
-
-//    @Override
-//    public void afterNavigation(AfterNavigationEvent event) {
-//        authService.updateBalance(currentBalance);
-//        currentBalanceSpan.setText(String.valueOf(currentBalance));
-//    }
 
     public static void updateCurrentBalance(double amount) {
         currentBalance += amount;

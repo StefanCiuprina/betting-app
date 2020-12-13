@@ -7,6 +7,7 @@ import com.example.application.views.addresult.AddResultView;
 import com.example.application.views.admin.AdminView;
 import com.example.application.views.currentticket.CurrentticketView;
 import com.example.application.views.home.BetNowView;
+import com.example.application.views.login.LoginView;
 import com.example.application.views.logout.LogoutView;
 import com.example.application.views.main.MainView;
 import com.example.application.views.mybets.MybetsView;
@@ -43,6 +44,22 @@ public class AuthService extends CrudService<User, Integer> {
         userRepository.save(existingUser);
     }
 
+    public String getUserFullName() {
+        return userRepository.findById(currentUserID).orElse(null).getFullName();
+    }
+
+    public boolean isUser() {
+        return userRepository.findById(currentUserID).orElse(null).getRole().equals(Role.USER);
+    }
+
+    public String getUsername() {
+        return userRepository.findById(currentUserID).orElse(null).getUsername();
+    }
+
+    public String getEmail() {
+        return userRepository.findById(currentUserID).orElse(null).getEmail();
+    }
+
     public static class AuthorizedRoute{
         public String route;
         public String name;
@@ -55,6 +72,14 @@ public class AuthService extends CrudService<User, Integer> {
     }
 
     public class AuthException extends Exception {
+    }
+
+    public boolean usernameExists(String username) {
+        return userRepository.getByUsername(username) != null;
+    }
+
+    public boolean emailExists(String email) {
+        return userRepository.getByEmail(email) != null;
     }
 
 
@@ -78,6 +103,36 @@ public class AuthService extends CrudService<User, Integer> {
         }
     }
 
+    public boolean verifyPassword(String password) {
+        return userRepository.getById(currentUserID).checkPassword(password);
+    }
+
+    public void updateUser(String username, String password, String email) {
+        User user = userRepository.getById(currentUserID);
+        if(!username.isEmpty()) {
+            user.setUsername(username);
+            userRepository.save(user);
+        }
+        if(!password.isEmpty()) {
+            userRepository.removeById(currentUserID);
+            user = new User(user.getUsername(), password, user.getRole(), user.getEmail(), user.getFullName(), user.getDateOfBirth(), user.getBalance());
+            userRepository.save(user);
+            user = userRepository.getByUsername(user.getUsername());
+            currentUserID = user.getId();
+        }
+        if(!email.isEmpty()) {
+            user.setEmail(email);
+            userRepository.save(user);
+        }
+    }
+
+    public void deleteUser(int id) {
+        userRepository.removeById(id);
+    }
+
+    public void createUser(User user) {
+        userRepository.save(user);
+    }
 
     private void createRoutes(Role role) {
         getAuthorizedRoutes(role).stream()
@@ -102,6 +157,7 @@ public class AuthService extends CrudService<User, Integer> {
             routes.add(new AuthorizedRoute("admin", "Admin", AdminView.class));
             routes.add(new AuthorizedRoute("addmatches", "Add upcoming matches", UpcomingMatchesAdderView.class));
             routes.add(new AuthorizedRoute("addresult", "Add result", AddResultView.class));
+            routes.add(new AuthorizedRoute("settings", "Settings", SettingsView.class));
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class));
         }
 

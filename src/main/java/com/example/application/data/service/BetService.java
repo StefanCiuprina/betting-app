@@ -65,7 +65,7 @@ public class BetService {
 
     public boolean isBetWonById(int betID) {
         Bet existingBet = betRepository.findById(betID).orElse(null);
-        return existingBet.isWon();
+        return existingBet.isFinished() && existingBet.isWon();
     }
 
     public boolean isBetFinishedAndLostById(int betID) {
@@ -75,5 +75,19 @@ public class BetService {
 
     public void deleteAllUnplacedBetsOfId(int id) {
         betRepository.removeAllUnplacedById(id);
+    }
+
+    public List<Bet> getAllBetsOfTicket(int bettingTicketId) {
+        return betRepository.getAllByBettingTicketId(bettingTicketId);
+    }
+
+    public void setBettingTicketIdToBet(int betId, int ticketId) {
+        Bet existingBet = betRepository.getById(betId);
+        existingBet.setBettingTicketId(ticketId);
+        betRepository.save(existingBet);
+    }
+
+    public void deleteBetByTicketId(int id) {
+        betRepository.deleteByBettingTicketId(id);
     }
 }

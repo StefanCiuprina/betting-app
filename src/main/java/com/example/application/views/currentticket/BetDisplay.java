@@ -19,7 +19,6 @@ public class BetDisplay {
 
     //for bet place
     private String finalOdd; //also for finished bets
-    private String betIDs; //also for finished bets
 
     //for finished bets:
     private String amountPlaced;

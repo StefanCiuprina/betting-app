@@ -38,6 +38,18 @@ public class User extends AbstractEntity {
         this.balance = 0;
     }
 
+    public User(String username, String password, Role role, String email, String fullName, LocalDate dateOfBirth, double balance) {
+        this.username = username;
+        this.role = role;
+        this.passwordSalt = RandomStringUtils.random(32);
+        this.passwordHash = DigestUtils.sha1Hex(password + passwordSalt);
+
+        this.email = email;
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+        this.balance = balance;
+    }
+
     public boolean checkPassword(String password) {
         return DigestUtils.sha1Hex(password + passwordSalt).equals(passwordHash);
     }
