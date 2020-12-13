@@ -82,6 +82,10 @@ public class AuthService extends CrudService<User, Integer> {
         return userRepository.getByEmail(email) != null;
     }
 
+    public User getUserById(int id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
 
     @Autowired
     private final UserRepository userRepository;
@@ -153,7 +157,6 @@ public class AuthService extends CrudService<User, Integer> {
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class));
 
         } else if (role.equals(Role.ADMIN)) {
-            routes.add(new AuthorizedRoute("home", "Bet Now", BetNowView.class));
             routes.add(new AuthorizedRoute("admin", "Admin", AdminView.class));
             routes.add(new AuthorizedRoute("addmatches", "Add upcoming matches", UpcomingMatchesAdderView.class));
             routes.add(new AuthorizedRoute("addresult", "Add result", AddResultView.class));

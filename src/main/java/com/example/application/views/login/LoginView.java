@@ -71,7 +71,12 @@ public class LoginView extends Div {
                         authService.authenticate(username.getValue(), password.getValue());
                         WalletView.currentBalance = authService.getBalance();;
                         MybetsView.bettingTicketId = -1;
-                        UI.getCurrent().navigate("home");
+                        User user = authService.getUserById(AuthService.currentUserID);
+                        if(user.getRole().equals(Role.ADMIN)) {
+                            UI.getCurrent().navigate("admin");
+                        } else {
+                            UI.getCurrent().navigate("home");
+                        }
                     } catch (AuthService.AuthException e) {
                         Notification.show("Wrong credentials.");
                     }
