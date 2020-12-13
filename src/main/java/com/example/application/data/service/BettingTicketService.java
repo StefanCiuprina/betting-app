@@ -44,4 +44,8 @@ public class BettingTicketService {
         existingTicket.setCashedIn(true);
         bettingTicketRepository.save(existingTicket);
     }
+
+    public boolean idExists(int bettingTicketId) {
+        return bettingTicketRepository.existsById(bettingTicketId);
+    }
 }

@@ -30,7 +30,9 @@ public class Bet extends AbstractEntity {
     private int scoreAway;
     private boolean won;
 
+    private int bettingTicketId;
+
     public Bet(int currentUserID, String homeTeam, String awayTeam, BetType betType, double round2Decimals, LocalDate matchDate, LocalTime matchTime, boolean b) {
-        this(currentUserID, homeTeam, awayTeam, betType, round2Decimals, matchDate, matchTime, b, false, 0, 0, false);
+        this(currentUserID, homeTeam, awayTeam, betType, round2Decimals, matchDate, matchTime, b, false, 0, 0, false, -1);
     }
 }

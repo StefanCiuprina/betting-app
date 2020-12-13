@@ -9,4 +9,6 @@ public interface BettingTicketRepository extends JpaRepository<BettingTicket, In
 
     List<BettingTicket> getAllByUserID(int userID);
 
+    boolean existsById(int id);
+
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDate;
 
@@ -14,9 +15,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @Table(name = "BettingTickets")
-public class BettingTicket extends AbstractEntity {
+public class BettingTicket {
+    @Id
+    private int id;
     private int userID;
-    private String betIDs;
     private double odd;
     private double possibleAmountToWin;
     private double amountPlaced;

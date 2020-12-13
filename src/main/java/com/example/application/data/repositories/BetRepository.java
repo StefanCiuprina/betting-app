@@ -23,4 +23,10 @@ public interface BetRepository extends JpaRepository<Bet, Integer> {
     @Modifying
     @Query("DELETE FROM Bet t where t.placed = false and t.userID = ?1")
     void removeAllUnplacedById(int id);
+
+    List<Bet> getAllByBettingTicketId(int id);
+
+    @Transactional
+    @Modifying
+    void deleteByBettingTicketId(int id);
 }

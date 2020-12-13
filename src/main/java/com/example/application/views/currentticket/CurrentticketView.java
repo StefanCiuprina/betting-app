@@ -42,7 +42,7 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
     private BettingTicketService bettingTicketService;
     private AuthService authService;
 
-    private String betIDs;
+    private List<Integer> betIDs;
     private double finalOdd;
     private double possibleAmountToWin;
     private double amountPlaced;
@@ -199,12 +199,21 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
                         if(amountPlaced <= WalletView.currentBalance) {
                             WalletView.updateCurrentBalance(-amountPlaced);
                             authService.updateBalance(WalletView.currentBalance);
-                            BettingTicket bettingTicket = new BettingTicket(AuthService.currentUserID,
-                                    betIDs, finalOdd,
+                            int bettingTicketId = betIDs.get(0);
+                            while(bettingTicketService.idExists(bettingTicketId)) {
+                                bettingTicketId += 100;
+                            }
+                            BettingTicket bettingTicket = new BettingTicket(bettingTicketId, AuthService.currentUserID,
+                                    finalOdd,
                                     possibleAmountToWin, amountPlaced,
                                     true, false,
                                     LocalDate.now(),
                                     false);
+
+                            for(int betID : betIDs) {
+                                betService.setBettingTicketIdToBet(betID, bettingTicketId);
+                            }
+
                             bettingTicketService.addBettingTicket(bettingTicket);
                             Notification.show("Bet placed!");
                             betService.setAllBetsPlaced(AuthService.currentUserID);
@@ -241,7 +250,7 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
                 buttonClose.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
                     @Override
                     public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                        MybetsView.betIDs = null;
+                        MybetsView.bettingTicketId = -1;
                         UI.getCurrent().getPage().setLocation("mybets");
                     }
                 });
@@ -259,6 +268,8 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
+        this.betIDs = new ArrayList<>();
+
         boolean placeBetMode = true;
         boolean ongoing = false;
         boolean betLost = false;
@@ -271,22 +282,15 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
             if (!betService.noCurrentBetsOfUser(AuthService.currentUserID)) {
                 bets = betService.getAllCurrentBetsOfUser(AuthService.currentUserID);
             } else {
-                bets = new ArrayList<>();
-                this.betIDs = MybetsView.betIDs;
-                if (this.betIDs == null) {
+                if (MybetsView.bettingTicketId == -1) {
                     grid.setItems(betDisplays);
                     return;
                 }
+                bets = betService.getAllBetsOfTicket(MybetsView.bettingTicketId);
                 placeBetMode = false;
-                String[] betIDs = this.betIDs.split("_");
-                for (String betIDString : betIDs) {
-                    int betID = Integer.parseInt(betIDString);
-                    bets.add(betService.getBetByID(betID));
-                }
             }
 
             finalOdd = 1;
-            StringBuilder betIDs = new StringBuilder();
             for (Bet bet : bets) {
                 String imageHome, imageAway;
                 imageHome = getTeamLogo(bet.getHomeTeam());
@@ -301,8 +305,7 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
                     ongoing = true;
                 }
                 if (placeBetMode) {
-                    betIDs.append(bet.getId());
-                    betIDs.append("_");
+                    betIDs.add(bet.getId());
                 }
                 if (bet.isFinished() && !bet.isWon()) {
                     betLost = true;
@@ -313,9 +316,7 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
             }
             finalOdd = round(finalOdd, 2);
             if (placeBetMode) {
-                betIDs.deleteCharAt(betIDs.length() - 1); //delete last _
-                betDisplays.add(finishCreatingBet(finalOdd, betIDs.toString()));
-                this.betIDs = betIDs.toString();
+                betDisplays.add(finishCreatingBet(finalOdd));
             } else {
                 betDisplays.add(finishedBet(ongoing, finalOdd, MybetsView.possibleAmountToWin, betLost, won, MybetsView.amountPlaced));
             }
@@ -409,11 +410,10 @@ public class CurrentticketView extends Div implements AfterNavigationObserver {
         return b;
     }
 
-    private static BetDisplay finishCreatingBet(double finalOdd, String betIDs) {
+    private static BetDisplay finishCreatingBet(double finalOdd) {
         BetDisplay b = new BetDisplay();
         b.setBetDisplayTipe(BetDisplayType.FINISH_CREATING_BET);
         b.setFinalOdd(String.valueOf(finalOdd));
-        b.setBetIDs(betIDs);
         return b;
     }
 

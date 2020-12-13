@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.service.AuthService;
+import com.example.application.views.wallet.WalletView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -62,11 +63,14 @@ public class MainView extends AppLayout {
         layout.setSpacing(false);
         layout.getThemeList().set("spacing-s", true);
         layout.setAlignItems(FlexComponent.Alignment.STRETCH);
-        HorizontalLayout logoLayout = new HorizontalLayout();
+        VerticalLayout logoLayout = new VerticalLayout();
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         logoLayout.add(new Image("images/logo.png", "auth-example logo"));
-        logoLayout.add(new H1("Betting app"));
+        logoLayout.add(new H1("Hello, " + authService.getUserFullName() + "!"));
+        if(authService.isUser()) {
+            logoLayout.add(new H1("Balance: " + WalletView.currentBalance));
+        }
         layout.add(logoLayout, menu);
         return layout;
     }
