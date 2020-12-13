@@ -19,7 +19,7 @@ import java.util.List;
  *
  */
 @SpringBootApplication
-@PWA(name = "auth-example", shortName = "auth-example")
+@PWA(name = "betting-app", shortName = "betting-app")
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static double round(double value, int places) {
@@ -32,11 +32,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
     }
 
     public static void main(String[] args) {
-        ApplicationContext context = SpringApplication.run(Application.class, args);
-
-//        OddsService oddsService = (OddsService) context.getBean("oddsService");
-//        System.out.println(oddsService.getBetOdds("FC Voluntari", "Academica Clinceni"));
-
+        SpringApplication.run(Application.class, args);
     }
 
 }
